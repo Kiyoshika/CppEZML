@@ -1,6 +1,5 @@
 #ifndef DECISIONTREE_H
 #define DECISIONTREE_H
-
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -109,10 +108,11 @@ class DecisionTree {
 
 		}
 
-		std::vector<double> split_feature(int feature_index, std::vector<std::vector<double>> data, std::vector<int> labels, char feature_type = 'n')  {
+		std::vector<double> split_feature(int feature_index, std::vector<std::vector<double>> data, std::vector<int> labels, char feature_type)  {
 			std::vector<int> left_labels;
 			std::vector<int> right_labels;
 			double split_point;
+			double split_entropy;
 			// feature_type = n is numeric
 			// feature type = c is categorical
 			if (feature_type == 'n') {
@@ -125,9 +125,58 @@ class DecisionTree {
 						right_labels.push_back(labels[i]);
 					}
 				}
+
+
+				split_entropy = ((double)left_labels.size() / (double)data.size())*entropy(left_labels) + ((double)right_labels.size() / (double)data.size())*entropy(right_labels);
+			}
+			else if (feature_type == 'c') {
+				std::vector<int> temp_left_labels; // going to be resuing these until we find best category label to split on
+				std::vector<int> temp_right_labels;
+
+				// iterate over every unique label and select one that returns minimum entropy (to maximize information gain)
+				// first, transpose column vector into integer row vector and call get_unique_labels
+				std::vector<int> unique_category_labels;
+				for (int i = 0; i < data.size(); ++i) {
+					unique_category_labels.push_back((int)data[i][feature_index]);
+				}
+
+				unique_category_labels = get_unique_labels(unique_category_labels);
+				std::vector<double> category_entropy_list;
+				double temp_entropy;
+
+				for (int i = 0; i < unique_category_labels.size(); ++i) {
+					for (int r = 0; r < data.size(); ++r) {
+						if ((int)data[r][feature_index] == unique_category_labels[i]) {
+							temp_left_labels.push_back(labels[r]);
+						} else {
+							temp_right_labels.push_back(labels[r]);
+						}
+					}
+
+					temp_entropy = ((double)left_labels.size() / (double)data.size())*entropy(left_labels) + ((double)right_labels.size() / (double)data.size())*entropy(right_labels);
+					category_entropy_list.push_back(temp_entropy);
+				        // empty vectors to reuse on next iteration
+					temp_left_labels.clear();
+					temp_right_labels.clear();	
+				}
+
+				// find which category contained best (minimum) entropy
+				int best_index = -1;
+				double current_entropy = -1;
+				for (int i = 0; i < category_entropy_list.size(); ++i) {
+					if (category_entropy_list[i] > current_entropy) {
+						best_index = i;
+						current_entropy = category_entropy_list[i];
+					}
+				}
+
+				// finally, set the split point and entropy
+				split_entropy = current_entropy;
+				split_point = unique_category_labels[best_index];
+
+
 			}
 			
-			double split_entropy = ((double)left_labels.size() / (double)data.size())*entropy(left_labels) + ((double)right_labels.size() / (double)data.size())*entropy(right_labels);
 			std::vector<double> split_feature_data;
 			split_feature_data.push_back(split_entropy);
 			split_feature_data.push_back(split_point);
@@ -136,7 +185,16 @@ class DecisionTree {
 			return split_feature_data;
 		}
 
-		void grow_tree(Node *tree_node, std::vector<std::vector<double>> data, std::vector<int> labels, int max_depth, int current_depth, int min_samples_split) {
+		void grow_tree(
+				Node *tree_node, 
+				std::vector<std::vector<double>> data, 
+				std::vector<int> labels, 
+				int max_depth, 
+				int current_depth, 
+				int min_samples_split, 
+				std::vector<int> *categorical_columns
+				) {
+
 			if (current_depth > max_depth) {
 				throw std::runtime_error("Current tree depth is greater than maximum allowed depth!");
 			}
@@ -149,8 +207,22 @@ class DecisionTree {
 			double info_gain;
 			double split_point;
 			std::vector<double> feature_split;
+
+
 			for (int i = 0; i < data[0].size(); ++i) {
-				feature_split = split_feature(i, data, labels);
+				
+				if (		categorical_columns == NULL
+						|| categorical_columns != NULL && std::find(categorical_columns->begin(), categorical_columns->end(), i) == categorical_columns->end()
+				) {
+					feature_split = split_feature(i, data, labels, 'n');
+				} else if (
+						categorical_columns != NULL
+						&& std::find(categorical_columns->begin(), categorical_columns->end(), i) != categorical_columns->end()	
+					) {
+					feature_split = split_feature(i, data, labels, 'c');
+				} else {
+					throw std::invalid_argument("There was a problem trying to determine if your data was categorical or not. Please check your categorical_columns parameter.");
+				}
 				info_gain = root_entropy - feature_split[0]; // zeroth index contains the entropy from the split
 				if (info_gain > max_info_gain) {
 					max_info_gain = info_gain;
@@ -199,11 +271,11 @@ class DecisionTree {
 				// must have at least two samples to split (could be controlled by parameter)
 				// must have more than one unique label (otherwise it's a perfect leaf node)
 				if (tree_node->left->data.size() > (min_samples_split - 1) && left_unique.size() > 1) {
-					grow_tree(tree_node->left, left_data, left_labels, max_depth, current_depth + 1, min_samples_split);
+					grow_tree(tree_node->left, left_data, left_labels, max_depth, current_depth + 1, min_samples_split, categorical_columns);
 				} 
 				
 				if (tree_node->right->data.size() > (min_samples_split - 1) && right_unique.size() > 1) {
-					grow_tree(tree_node->right, right_data, right_labels, max_depth, current_depth + 1, min_samples_split);
+					grow_tree(tree_node->right, right_data, right_labels, max_depth, current_depth + 1, min_samples_split, categorical_columns);
 			
 				}
 			}
@@ -240,12 +312,13 @@ class DecisionTree {
 			}
 		}
 
-		void fit(std::vector<std::vector<double>> data, std::vector<int> labels, int max_depth = 100, int min_samples_split = 2) {
+		void fit(std::vector<std::vector<double>> data, std::vector<int> labels, std::vector<int> *categorical_columns = nullptr, int max_depth = 100, int min_samples_split = 2) {
+
 			if (min_samples_split < 2) {
 				throw std::invalid_argument("Please set min_samples_split parameter to at least 2.");
 			}
 			root = new Node();
-			grow_tree(root, data, labels, max_depth, 1, min_samples_split);
+			grow_tree(root, data, labels, max_depth, 1, min_samples_split, categorical_columns);
 		}
 
 		std::vector<int> predict(std::vector<std::vector<double>> data) {
