@@ -17,14 +17,14 @@ class DataSet {
         bool has_headers = true;
 
         // load rows into data matrix
-        void split(string text, int current_row, char sep = ',') {
+        void split(string text, int current_row, std::string sep = ",") {
             bool inside_string = false;
             int start_index = 0;
 
             for (int i = 0; i < text.length(); i++) {
-                if (text[i] == sep && !inside_string) {
+                if ((text.substr(i, sep.length()).compare(sep)) == 0 && !inside_string){
                     data[current_row].push_back(text.substr(start_index, i - start_index));
-                    start_index = i + 1;
+                    start_index = i + sep.length();
                 }
 
                 if (i == text.length() - 1) {
@@ -39,14 +39,14 @@ class DataSet {
         }
 
         // load headers (if exists) into columns vector
-        void split(string text, char sep = ',') {
+        void split(string text, std::string sep = ",") {
             bool inside_string = false;
             int start_index = 0;
 
             for (int i = 0; i < text.length(); i++) {
-                if (text[i] == sep && !inside_string) {
+                if ((text.substr(i, sep.length()).compare(sep)) == 0 && !inside_string) {
                     columns.push_back(text.substr(start_index, i - start_index));
-                    start_index = i + 1;
+                    start_index = i + sep.length();
                 }
 
                 if (i == text.length() - 1) {
@@ -64,7 +64,7 @@ class DataSet {
         vector<string> columns;
 
         // load from file
-        void load(string filepath, char sep = ',', bool has_headers = true) {
+        void load(string filepath, std::string sep = ",", bool has_headers = true) {
             this->has_headers = has_headers;
 
             string current_line;
@@ -337,5 +337,26 @@ class DataSet {
 
 	    return subset;
 	}
+
+	std::vector<int> get_column_indices(std::vector<std::string> column_names) {
+		// iterate over provided vector of column names and return the indices
+		std::vector<int> column_indices;
+		for (int i = 0; i < column_names.size(); ++i) {
+			for (int j = 0; j < columns.size(); ++j) {
+				if (columns[j].compare(column_names[i]) == 0) {
+					column_indices.push_back(j);
+					break;
+				}
+			}
+		}
+
+		// validate that column indices matches original input
+		if (column_indices.size() != column_names.size()) {
+			throw std::invalid_argument("column_names parameter could not find all columns in data set. Please double check your column names.");
+		}
+
+		return column_indices;	
+	}
+
 };
 #endif
