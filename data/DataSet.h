@@ -10,8 +10,6 @@
 #include <algorithm>
 #include <map>
 
-using namespace std;
-
 // only supports delimiters of one character length
 class DataSet
 {
@@ -19,7 +17,7 @@ private:
 	bool has_headers = true;
 
 	// load rows into data matrix
-	void split(string text, int current_row, std::string sep = ",")
+	void split(std::string text, int current_row, std::string sep = ",")
 	{
 		bool inside_string = false;
 		int start_index = 0;
@@ -50,7 +48,7 @@ private:
 	}
 
 	// load headers (if exists) into columns vector
-	void split(string text, std::string sep = ",")
+	void split(std::string text, std::string sep = ",")
 	{
 		bool inside_string = false;
 		int start_index = 0;
@@ -81,15 +79,15 @@ private:
 	}
 
 public:
-	vector<vector<string>> data;
-	vector<string> columns;
+	std::vector<std::vector<std::string>> data;
+	std::vector<std::string> columns;
 
 	// load from file
-	void load(string filepath, std::string sep = ",", bool has_headers = true)
+	void load(std::string filepath, std::string sep = ",", bool has_headers = true)
 	{
 		this->has_headers = has_headers;
 
-		string current_line;
+		std::string current_line;
 		int current_row = 0;
 
 		try
@@ -116,7 +114,7 @@ public:
 					else
 					{
 						// populate data matrix
-						data.push_back(vector<string>()); // create rows
+						data.push_back(std::vector<std::string>()); // create rows
 						split(current_line, current_row, sep);
 						current_row += 1;
 					}
@@ -130,7 +128,7 @@ public:
 	}
 
 	// load from another data set (with columns)
-	void load(vector<vector<string>> data, vector<string> columns)
+	void load(std::vector<std::vector<std::string>> data, std::vector<std::string> columns)
 	{
 		this->data = data;
 		this->columns = columns;
@@ -167,11 +165,11 @@ public:
 	}
 
 	// select subset of original data set by index (creates new data set)
-	DataSet select(vector<int> indices)
+	DataSet select(std::vector<int> indices)
 	{
 		int new_size = indices.size();
 
-		vector<string> new_columns;
+		std::vector<std::string> new_columns;
 
 		if (has_headers)
 		{
@@ -181,11 +179,11 @@ public:
 			}
 		}
 
-		vector<vector<string>> new_data;
+		std::vector<std::vector<std::string>> new_data;
 
 		for (int r = 0; r < data.size() - 1; ++r)
 		{
-			new_data.push_back(vector<string>());
+			new_data.push_back(std::vector<std::string>());
 			for (int c = 0; c < new_size; ++c)
 			{
 				new_data[r].push_back(data[r][indices[c]]);
@@ -199,28 +197,28 @@ public:
 	}
 
 	// select subset of original data set by name (creates new data set)
-	DataSet select(vector<string> names)
+	DataSet select(std::vector<std::string> names)
 	{
 		int new_size = names.size();
 
 		// create map of indices from original column names to positions
-		map<string, int> name_index;
+		map<std::string, int> name_index;
 		for (int i = 0; i < columns.size(); ++i)
 		{
-			name_index.insert(pair<string, int>(columns[i], i));
+			name_index.insert(pair<std::string, int>(columns[i], i));
 		}
 
-		vector<string> new_columns;
+		std::vector<std::string> new_columns;
 		for (int i = 0; i < new_size; ++i)
 		{
 			new_columns.push_back(names[i]);
 		}
 
-		vector<vector<string>> new_data;
+		std::vector<std::vector<std::string>> new_data;
 
 		for (int r = 0; r < data.size() - 1; ++r)
 		{
-			new_data.push_back(vector<string>());
+			new_data.push_back(std::vector<std::string>());
 			for (int c = 0; c < new_size; ++c)
 			{
 				new_data[r].push_back(data[r][name_index[new_columns[c]]]);
@@ -234,7 +232,7 @@ public:
 	}
 
 	// return subset of original data filtered by conditions
-	DataSet filter(vector<vector<string>> conditions)
+	DataSet filter(std::vector<std::vector<std::string>> conditions)
 	{
 
 		FilterData fd;
@@ -269,6 +267,75 @@ public:
 		}
 
 		return column_indices;
+	}
+
+	// used for "on the fly" conversions e.g when using fit() methods on models and such
+	// designed for independent variables
+	std::vector<std::vector<double>> cast_data_double()
+	{
+		std::vector<std::vector<double>> new_data;
+		std::vector<double> new_row;
+
+		for (int i = 0; i < this->data.size(); ++i)
+		{
+			for (int j = 0; j < this->data[i].size(); ++j)
+			{
+				try
+				{
+					new_row.push_back(stod(this->data[i][j]));
+				}
+				catch (int e)
+				{
+					throw std::runtime_error("Could not convert some of your data to a double!");
+				}
+			}
+			new_data.push_back(new_row);
+			new_row.clear();
+		}
+
+		return new_data;
+	}
+
+	// used for "on the fly" conversions e.g when using fit() methods on models and such
+	// designed for dependent variables (e.g classes must be integers, but regression could be doubles)
+	std::vector<int> cast_target_int()
+	{
+		std::vector<int> new_data;
+
+		for (int i = 0; i < this->data.size(); ++i)
+		{
+			try
+			{
+				// we're assuming that target is a one-column data set
+				new_data.push_back(stoi(this->data[i][0]));
+			}
+			catch (int e)
+			{
+				throw std::runtime_error("Could not convert some of your data to an int!");
+			}
+		}
+
+		return new_data;
+	}
+
+	std::vector<double> cast_target_double()
+	{
+		std::vector<double> new_data;
+
+		for (int i = 0; i < this->data.size(); ++i)
+		{
+			try
+			{
+				// we're assuming that target is a one-column data set
+				new_data.push_back(stod(this->data[i][0]));
+			}
+			catch (int e)
+			{
+				throw std::runtime_error("Could not convert some of your data to a double!");
+			}
+		}
+
+		return new_data;
 	}
 };
 #endif

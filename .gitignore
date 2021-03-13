@@ -3,3 +3,9 @@ test
 test.csv
 README.md
 .vscode
+xtrain.csv
+xtest.csv
+ytrain.csv
+ytest.csv
+.ipynb_checkpoints/
+generate_data.ipynb
