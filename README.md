@@ -1,5 +1,5 @@
 # CppEZML
-A work in progress C++ machine learning library designed to be very easy to use. Everything written from scratch.
+A work in progress C++ machine learning library designed to be very easy to use. Everything pretty much written from scratch.
 
 # Latest Release
 ## v0.3.0 -- 14 March 2021 (Happy Pi Day!)
