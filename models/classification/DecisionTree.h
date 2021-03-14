@@ -31,9 +31,8 @@ public:
 	std::vector<int> get_unique_labels()
 	{
 		std::vector<int> labels_copy = labels;
-		std::vector<int>::iterator ip;
-		ip = std::unique(labels_copy.begin(), labels_copy.end());
-		labels_copy.resize(std::distance(labels_copy.begin(), ip));
+		std::sort(labels_copy.begin(), labels_copy.end());
+        labels_copy.erase(std::unique(labels_copy.begin(), labels_copy.end()), labels_copy.end());
 
 		return labels_copy;
 	}
