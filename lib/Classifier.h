@@ -8,13 +8,13 @@ class Classifier
 public:
     // all classes must implement a predict() and fit() method
     virtual void fit(
-        std::vector<std::vector<double>>,   // data
-        std::vector<int>                    // target
+        std::vector<std::vector<double>> const&,   // data
+        std::vector<int> const&                    // target
         ) = 0;
 
-    virtual std::vector<int> predict(std::vector<std::vector<double>>) = 0;
+    virtual std::vector<int> predict(std::vector<std::vector<double>> const&) = 0;
 
-    double get_f1_score(std::vector<int> actual_y, std::vector<int> predicted_y)
+    double get_f1_score(std::vector<int> const &actual_y, std::vector<int> const &predicted_y)
     {
         if (actual_y.size() != predicted_y.size())
         {

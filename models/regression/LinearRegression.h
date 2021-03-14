@@ -50,7 +50,7 @@ private:
 	}
 
 	// local predict, not to be confused with the public predict()
-	double predict(std::vector<double> weights, std::vector<double> input_x_row)
+	double predict(std::vector<double> const &weights, std::vector<double> const &input_x_row)
 	{
 
 		double result = 0;
@@ -78,7 +78,7 @@ public:
 		if (loss_func != NULL) { user_loss_func = loss_func; }
 	}
 
-	void fit(std::vector<std::vector<double>> train_x, std::vector<double> train_y) override
+	void fit(std::vector<std::vector<double>> const &train_x, std::vector<double> const &train_y) override
 	{
 		// create initial weights equal to size of input columns (# of indep vars)
 		for (int col = 0; col < train_x[0].size(); ++col)
@@ -148,7 +148,7 @@ public:
 		is_fitted = true;
 	}
 
-	std::vector<double> predict(std::vector<std::vector<double>> input_x) override
+	std::vector<double> predict(std::vector<std::vector<double>> const &input_x) override
 	{
 		if (!is_fitted)
 		{
@@ -196,7 +196,7 @@ public:
 		std::cout << std::endl;
 	}
 
-	void print_predictions(std::vector<std::vector<double>> input_x, char style = 'h')
+	void print_predictions(std::vector<std::vector<double>> const &input_x, char style = 'h')
 	{
 		// h = horizontally
 		// v = vertically
