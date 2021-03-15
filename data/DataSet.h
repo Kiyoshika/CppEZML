@@ -8,13 +8,21 @@
 #include <math.h>
 #include <fstream>
 #include <algorithm>
-#include <map>
+#include <unordered_map>
 
-// only supports delimiters of one character length
 class DataSet
 {
 private:
 	bool has_headers = true;
+
+	std::vector<std::string> get_unique_columns(std::vector<std::string> const &columns)
+	{
+		std::vector<std::string> columns_copy = columns;
+		std::sort(columns_copy.begin(), columns_copy.end());
+        columns_copy.erase(std::unique(columns_copy.begin(), columns_copy.end()), columns_copy.end());
+
+		return columns_copy;
+	}
 
 	// load rows into data matrix
 	void split(std::string text, int current_row, std::string sep = ",")
@@ -75,6 +83,10 @@ private:
 			{
 				inside_string = false;
 			}
+		}
+
+		if (get_unique_columns(columns).size() != columns.size()) {
+			throw std::runtime_error("Columns must be uniquely named when loading");
 		}
 	}
 
@@ -202,7 +214,7 @@ public:
 		int new_size = names.size();
 
 		// create map of indices from original column names to positions
-		map<std::string, int> name_index;
+		unordered_map<std::string, int> name_index;
 		for (int i = 0; i < columns.size(); ++i)
 		{
 			name_index.insert(pair<std::string, int>(columns[i], i));
@@ -336,6 +348,123 @@ public:
 		}
 
 		return new_data;
+	}
+
+	/*
+	@param n Number of samples to take (default = 1)
+	@param replace Whether to replace a sample after it was drawn (default = false)
+	@return A new instance of DataSet representing the sampled data.
+	*/
+	DataSet sample(int n = 1, bool replace = false)
+	{
+		if (n < 1)
+		{
+			throw std::invalid_argument("You must sample at least one element.");
+		}
+		else if (n > this->data.size() && !replace)
+		{
+			throw std::invalid_argument("You can't uniquely sample elements larger than your data set.");
+		}
+
+		unordered_map<int, int> unique_indices;
+		std::vector<int> random_indices;
+		int iter = 0;
+		int random_index;
+
+		while (iter < n)
+		{
+			random_index = rand() % (this->data.size() + 1);
+			if (!replace && unique_indices.count(random_index) == 0)
+			{
+				unique_indices[random_index] = 1;
+				random_indices.push_back(random_index);
+				iter += 1;
+			}
+			else
+			{
+				random_indices.push_back(random_index);
+				iter += 1;
+			}
+		}
+
+		// extract rows that were sampled
+		std::vector<std::vector<std::string>> sampled_data;
+		for (int i = 0; i < n; ++i)
+		{
+			sampled_data.push_back(this->data[random_indices[i]]);
+		}
+
+		DataSet sampled;
+		sampled.load(sampled_data, this->columns);
+
+		return sampled;
+	}
+
+	/*
+	@param other_data DataSet to append
+	@param type Append on rows ('r') or columns ('r')
+	*/
+	DataSet append(DataSet other_data, char type = 'r')
+	{
+		DataSet appended;
+
+		// making a copy of current data set in order to not mutate it
+		std::vector<std::string> columns_copy = this->columns;
+		std::vector<std::vector<std::string>> data_copy = this->data;
+
+		if (type == 'r')
+		{
+			// check if columns match
+			if (this->data[0].size() != other_data.data[0].size())
+			{
+				throw std::runtime_error("Dimensions when appending data sets don't match.");
+			}
+			for (int i = 0; i < other_data.data.size(); ++i) {
+				data_copy.push_back(other_data.data[i]);
+			}
+
+			appended.load(data_copy, columns_copy);
+
+		}
+		else if (type == 'c')
+		{
+			// check if rows match
+			if (this->data.size() != other_data.data.size())
+			{
+				throw std::runtime_error("Dimensions when appending data sets don't match.");
+			}
+
+			// check column collision (all columns need to be uniquely named)
+			std::vector<std::string> col_intersection;
+			std::sort(columns_copy.begin(), columns_copy.end());
+			std::sort(other_data.columns.begin(), other_data.columns.end());
+			std::set_intersection(columns_copy.begin(), columns_copy.end(),
+									other_data.columns.begin(), other_data.columns.end(),
+									back_inserter(col_intersection));
+
+			if (col_intersection.size() > 0) 
+			{
+				throw std::runtime_error("Columns must be uniquely named between both data sets when appending.");
+			}
+
+			for (int i = 0; i < other_data.columns.size(); ++i) {
+				columns_copy.push_back(other_data.columns[i]);
+			}
+
+			for (int i = 0; i < this->data.size(); ++i) {
+				for (int j = 0; j < other_data.columns.size(); ++j) {
+					data_copy[i].push_back(other_data.columns[j]);
+				}
+			}
+
+			appended.load(data_copy, columns_copy);
+
+		} else 
+		{
+			throw std::invalid_argument("Only 'r' (rows) and 'c' (columns) are allowed when appending data.");
+		}
+
+		return appended;
 	}
 };
 #endif
