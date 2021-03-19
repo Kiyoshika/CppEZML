@@ -9,6 +9,7 @@
 #include <fstream>
 #include <algorithm>
 #include <unordered_map>
+#include <iomanip>
 
 class DataSet
 {
@@ -19,7 +20,7 @@ private:
 	{
 		std::vector<std::string> columns_copy = columns;
 		std::sort(columns_copy.begin(), columns_copy.end());
-        columns_copy.erase(std::unique(columns_copy.begin(), columns_copy.end()), columns_copy.end());
+		columns_copy.erase(std::unique(columns_copy.begin(), columns_copy.end()), columns_copy.end());
 
 		return columns_copy;
 	}
@@ -85,7 +86,8 @@ private:
 			}
 		}
 
-		if (get_unique_columns(columns).size() != columns.size()) {
+		if (get_unique_columns(columns).size() != columns.size())
+		{
 			throw std::runtime_error("Columns must be uniquely named when loading");
 		}
 	}
@@ -148,15 +150,30 @@ public:
 
 	void head(int rows = 10)
 	{
+		std::string cutoff_str;
 		// if column vector exists, print columns before data
 		if (columns.size() > 0)
 		{
 			for (int c = 0; c < columns.size(); ++c)
 			{
-				cout << columns[c] << "\t\t";
+
+				//std::cout << columns[c] << "\t\t";
+				if (columns[c].length() < 15) {
+					std::cout << columns[c] << std::setfill(' ') << std::setw(15 - columns[c].length());
+				} else if (columns[c].length() == 15) {
+					std::cout << columns[c];
+				} else {
+					cutoff_str = columns[c];
+					cutoff_str.replace(cutoff_str.begin() + 12, cutoff_str.end(), "...");
+					std::cout << cutoff_str;
+				}
+
+				std::cout << "\t";
 			}
+			std::cout << "\n";
+			std::cout << std::setfill('-') << std::setw(15*columns.size());
 		}
-		cout << endl;
+		std::cout << "\n";
 
 		// print #[rows] of data
 		for (int r = 0; r < rows; ++r)
@@ -169,9 +186,21 @@ public:
 			{
 				for (int c = 0; c < data[0].size(); ++c)
 				{
-					cout << data[r][c] << "\t\t";
+					//std::cout << data[r][c] << "\t\t";
+					//std::cout << columns[c] << "\t\t";
+					if (data[r][c].length() < 15) {
+						std::cout << data[r][c] << std::setfill(' ') << std::setw(15 - data[r][c].length());
+					} else if (data[r][c].length() == 15) {
+						std::cout << data[r][c];
+					} else {
+						cutoff_str = data[r][c];
+						cutoff_str.replace(cutoff_str.begin() + 12, cutoff_str.end(), "...");
+						std::cout << cutoff_str;
+					}
+
+					std::cout << "\t";
 				}
-				cout << endl;
+				std::cout << endl;
 			}
 		}
 	}
@@ -419,12 +448,12 @@ public:
 			{
 				throw std::runtime_error("Dimensions when appending data sets don't match.");
 			}
-			for (int i = 0; i < other_data.data.size(); ++i) {
+			for (int i = 0; i < other_data.data.size(); ++i)
+			{
 				data_copy.push_back(other_data.data[i]);
 			}
 
 			appended.load(data_copy, columns_copy);
-
 		}
 		else if (type == 'c')
 		{
@@ -439,32 +468,51 @@ public:
 			std::sort(columns_copy.begin(), columns_copy.end());
 			std::sort(other_data.columns.begin(), other_data.columns.end());
 			std::set_intersection(columns_copy.begin(), columns_copy.end(),
-									other_data.columns.begin(), other_data.columns.end(),
-									back_inserter(col_intersection));
+								  other_data.columns.begin(), other_data.columns.end(),
+								  back_inserter(col_intersection));
 
-			if (col_intersection.size() > 0) 
+			if (col_intersection.size() > 0)
 			{
 				throw std::runtime_error("Columns must be uniquely named between both data sets when appending.");
 			}
 
-			for (int i = 0; i < other_data.columns.size(); ++i) {
+			for (int i = 0; i < other_data.columns.size(); ++i)
+			{
 				columns_copy.push_back(other_data.columns[i]);
 			}
 
-			for (int i = 0; i < this->data.size(); ++i) {
-				for (int j = 0; j < other_data.columns.size(); ++j) {
+			for (int i = 0; i < this->data.size(); ++i)
+			{
+				for (int j = 0; j < other_data.columns.size(); ++j)
+				{
 					data_copy[i].push_back(other_data.columns[j]);
 				}
 			}
 
 			appended.load(data_copy, columns_copy);
-
-		} else 
+		}
+		else
 		{
 			throw std::invalid_argument("Only 'r' (rows) and 'c' (columns) are allowed when appending data.");
 		}
 
 		return appended;
 	}
+
+	void rename(std::unordered_map<std::string, std::string> new_cols)
+		{
+			std::unordered_map<string, string>::iterator map_it;
+			std::vector<std::string>::iterator vec_it;
+
+			for (map_it = new_cols.begin(); map_it != new_cols.end(); ++map_it)
+			{
+				vec_it = std::find(this->columns.begin(), this->columns.end(), map_it->first);
+				if (vec_it != this->columns.end()) {
+					this->columns[vec_it - this->columns.begin()] = map_it->second;
+				}
+
+				// if column in map is not found, ignore it
+			}
+		}
 };
 #endif
