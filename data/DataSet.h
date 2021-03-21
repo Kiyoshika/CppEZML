@@ -1,7 +1,6 @@
 #ifndef DATASET_H
 #define DATASET_H
 
-#include "../lib/FilterData.h"
 #include <iostream>
 #include <vector>
 #include <string>
@@ -10,6 +9,9 @@
 #include <algorithm>
 #include <unordered_map>
 #include <iomanip>
+
+#include "../lib/FilterData.h"
+#include "../stats/Stats.h"
 
 class DataSet
 {
@@ -92,6 +94,28 @@ private:
 		}
 	}
 
+	void print_describe_line(double value)
+	{
+		std::string num_string, cutoff_str;
+
+		num_string = std::to_string(value);
+		if (num_string.length() < 15)
+		{
+			std::cout << num_string << std::setfill(' ') << std::setw(15 - num_string.length());
+		}
+		else if (num_string.length() == 15)
+		{
+			std::cout << num_string;
+		}
+		else
+		{
+			cutoff_str = num_string;
+			cutoff_str.replace(cutoff_str.begin() + 12, cutoff_str.end(), "...");
+			std::cout << cutoff_str;
+		}
+		std::cout << "\t";
+	}
+
 public:
 	std::vector<std::vector<std::string>> data;
 	std::vector<std::string> columns;
@@ -158,11 +182,16 @@ public:
 			{
 
 				//std::cout << columns[c] << "\t\t";
-				if (columns[c].length() < 15) {
+				if (columns[c].length() < 15)
+				{
 					std::cout << columns[c] << std::setfill(' ') << std::setw(15 - columns[c].length());
-				} else if (columns[c].length() == 15) {
+				}
+				else if (columns[c].length() == 15)
+				{
 					std::cout << columns[c];
-				} else {
+				}
+				else
+				{
 					cutoff_str = columns[c];
 					cutoff_str.replace(cutoff_str.begin() + 12, cutoff_str.end(), "...");
 					std::cout << cutoff_str;
@@ -171,7 +200,7 @@ public:
 				std::cout << "\t";
 			}
 			std::cout << "\n";
-			std::cout << std::setfill('-') << std::setw(15*columns.size());
+			std::cout << std::setfill('-') << std::setw(15 * columns.size());
 		}
 		std::cout << "\n";
 
@@ -188,11 +217,16 @@ public:
 				{
 					//std::cout << data[r][c] << "\t\t";
 					//std::cout << columns[c] << "\t\t";
-					if (data[r][c].length() < 15) {
+					if (data[r][c].length() < 15)
+					{
 						std::cout << data[r][c] << std::setfill(' ') << std::setw(15 - data[r][c].length());
-					} else if (data[r][c].length() == 15) {
+					}
+					else if (data[r][c].length() == 15)
+					{
 						std::cout << data[r][c];
-					} else {
+					}
+					else
+					{
 						cutoff_str = data[r][c];
 						cutoff_str.replace(cutoff_str.begin() + 12, cutoff_str.end(), "...");
 						std::cout << cutoff_str;
@@ -500,19 +534,151 @@ public:
 	}
 
 	void rename(std::unordered_map<std::string, std::string> new_cols)
+	{
+		std::unordered_map<string, string>::iterator map_it;
+		std::vector<std::string>::iterator vec_it;
+
+		for (map_it = new_cols.begin(); map_it != new_cols.end(); ++map_it)
 		{
-			std::unordered_map<string, string>::iterator map_it;
-			std::vector<std::string>::iterator vec_it;
-
-			for (map_it = new_cols.begin(); map_it != new_cols.end(); ++map_it)
+			vec_it = std::find(this->columns.begin(), this->columns.end(), map_it->first);
+			if (vec_it != this->columns.end())
 			{
-				vec_it = std::find(this->columns.begin(), this->columns.end(), map_it->first);
-				if (vec_it != this->columns.end()) {
-					this->columns[vec_it - this->columns.begin()] = map_it->second;
-				}
-
-				// if column in map is not found, ignore it
+				this->columns[vec_it - this->columns.begin()] = map_it->second;
 			}
+
+			// if column in map is not found, ignore it
 		}
+	}
+
+	std::vector<std::string> transpose(int col_index)
+	{
+		std::vector<std::string> tposed;
+		for (int i = 0; i < this->data.size(); ++i)
+		{
+			tposed.push_back(this->data[i][col_index]);
+		}
+
+		return tposed;
+	}
+
+	std::vector<double> transpose_double(int col_index)
+	{
+		std::vector<std::string> data_tposed = transpose(col_index);
+		std::vector<double> data_double(data_tposed.size());
+		try
+		{
+			std::transform(data_tposed.begin(), data_tposed.end(), data_double.begin(), [](const std::string &val) {
+				return std::stod(val);
+			});
+		}
+		catch (int e)
+		{
+			std::runtime_error("Couldn't convert your data to double in transpose_double().");
+		}
+
+		return data_double;
+	}
+
+	void describe()
+	{
+		double _sum, _mean, _stdev, _min, _10p, _25p, _median, _75p, _90p, _max;
+		std::string cutoff_str;
+		std::cout << "             |  ";
+		for (int c = 0; c < columns.size(); ++c)
+		{
+
+			if (columns[c].length() < 15)
+			{
+				std::cout << columns[c] << std::setfill(' ') << std::setw(15 - columns[c].length());
+			}
+			else if (columns[c].length() == 15)
+			{
+				std::cout << columns[c];
+			}
+			else
+			{
+				cutoff_str = columns[c];
+				cutoff_str.replace(cutoff_str.begin() + 12, cutoff_str.end(), "...");
+				std::cout << cutoff_str;
+			}
+
+			std::cout << "\t";
+		}
+		std::cout << "\n";
+		std::cout << std::setfill('-') << std::setw(15 * columns.size() + 15);
+
+		Stats stats;
+		std::cout << "\nSum:" << std::setfill(' ') << std::setw(10) << "|" << "\t";
+		for (int c = 0; c < columns.size(); ++c)
+		{
+			_sum = stats.sum(this->data, c);
+			print_describe_line(_sum);
+		}
+
+		std::cout << "\nMin:" << std::setfill(' ') << std::setw(10) << "|" << "\t";
+		for (int c = 0; c < columns.size(); ++c)
+		{
+			_min = stats.min(this->data, c);
+			print_describe_line(_min);
+		}
+
+		std::cout << "\nMax:" << std::setfill(' ') << std::setw(10) << "|" << "\t";
+		for (int c = 0; c < columns.size(); ++c)
+		{
+			_max = stats.max(this->data, c);
+			print_describe_line(_max);
+		}
+
+		std::cout << "\nMean:" << std::setfill(' ') << std::setw(9) << "|" << "\t";
+		for (int c = 0; c < columns.size(); ++c)
+		{
+			_mean = stats.mean(this->data, c);
+			print_describe_line(_mean);
+		}
+
+		std::cout << "\nStDev:" << std::setfill(' ') << std::setw(8) << "|" << "\t";
+		for (int c = 0; c < columns.size(); ++c)
+		{
+			_stdev = stats.stdev(this->data, c);
+			print_describe_line(_stdev);
+		}
+
+		std::cout << "\n10th %:" << std::setfill(' ') << std::setw(7) << "|" << "\t";
+		for (int c = 0; c < columns.size(); ++c)
+		{
+			_10p = stats.percentile(this->data, c, 0.1);
+			print_describe_line(_10p);
+		}
+
+		std::cout << "\n25th %:" << std::setfill(' ') << std::setw(7) << "|" << "\t";
+		for (int c = 0; c < columns.size(); ++c)
+		{
+			_25p = stats.percentile(this->data, c, 0.25);
+			print_describe_line(_25p);
+		}
+
+		std::cout << "\nMedian:" << std::setfill(' ') << std::setw(7) << "|" << "\t";
+		for (int c = 0; c < columns.size(); ++c)
+		{
+			_median = stats.median(this->data, c);
+			print_describe_line(_median);
+		}
+
+		std::cout << "\n75th %:" << std::setfill(' ') << std::setw(7) << "|" << "\t";
+		for (int c = 0; c < columns.size(); ++c)
+		{
+			_75p = stats.percentile(this->data, c, 0.75);
+			print_describe_line(_75p);
+		}
+
+		std::cout << "\n90th %:" << std::setfill(' ') << std::setw(7) << "|" << "\t";
+		for (int c = 0; c < columns.size(); ++c)
+		{
+			_90p = stats.percentile(this->data, c, 0.90);
+			print_describe_line(_90p);
+		}
+
+		std::cout << "\n";
+	}
 };
 #endif
