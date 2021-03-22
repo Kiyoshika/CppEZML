@@ -11,6 +11,7 @@
 #include <iomanip>
 
 #include "../lib/FilterData.h"
+#include "../lib/SortData.h"
 #include "../stats/Stats.h"
 
 class DataSet
@@ -311,6 +312,7 @@ public:
 	{
 
 		FilterData fd;
+		fd.set_columns(this->columns);
 		std::vector<std::vector<std::string>> filtered_data = fd.filter(data, conditions);
 
 		DataSet subset;
@@ -679,6 +681,13 @@ public:
 		}
 
 		std::cout << "\n";
+	}
+
+	void sort(std::vector<std::vector<std::string>> sort_conditions)
+	{
+		SortData sd;
+		sd.set_columns(this->columns);
+		sd.sort(this->data, sort_conditions);
 	}
 };
 #endif
