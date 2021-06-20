@@ -27,7 +27,7 @@ private:
 		return -actual_y*log2(predicted_y) - (1 - actual_y)*log2(1 - predicted_y);
 	}
 
-	double loss_deriv(double actual_y, std::vector<double> train_x_row, int train_y_row)
+	double loss_deriv(double actual_y, std::vector<double> const &train_x_row, int train_y_row)
 	{
 		// using limit derivatives from calculus one
 		double loss_derivative;
@@ -35,10 +35,10 @@ private:
 		{
 			if (user_loss_func != NULL)
 			{
-				loss_derivative = loss_derivative = (user_loss_func(train_y_row, evaluate(weights, train_x_row, 0.0001)) - user_loss_func(train_y_row, evaluate(weights, train_x_row))) / 0.0001;
+				loss_derivative = loss_derivative = (user_loss_func(train_y_row, evaluate(this->weights, train_x_row, 0.0001)) - user_loss_func(train_y_row, evaluate(this->weights, train_x_row))) / 0.0001;
 			} else 
 			{
-				loss_derivative = loss_derivative = (loss(train_y_row, evaluate(weights, train_x_row, 0.0001)) - loss(train_y_row, evaluate(weights, train_x_row))) / 0.0001;
+				loss_derivative = loss_derivative = (loss(train_y_row, evaluate(this->weights, train_x_row, 0.0001)) - loss(train_y_row, evaluate(this->weights, train_x_row))) / 0.0001;
 			}
 		}
 		catch (int e)
@@ -49,8 +49,8 @@ private:
 		return loss_derivative;
 	}
 
-	// local predict, not to be confused with the public predict()
-	double evaluate(std::vector<double> weights, std::vector<double> input_x_row, double adjust = 0.0)
+	// evaluate models output
+	double evaluate(std::vector<double> const &weights, std::vector<double> const &input_x_row, double adjust = 0.0)
 	{
 
 		double result = 0;
@@ -83,7 +83,7 @@ public:
 		if (loss_func != NULL) { user_loss_func = loss_func; }
 	}
 
-	void fit(std::vector<std::vector<double>> train_x, std::vector<int> train_y) override
+	void fit(std::vector<std::vector<double>> const &train_x, std::vector<int> const &train_y) override
 	{
 		// create initial weights equal to size of input columns (# of indep vars)
 		for (int col = 0; col < train_x[0].size(); ++col)
@@ -156,7 +156,7 @@ public:
 		is_fitted = true;
 	}
 
-	std::vector<int> predict(std::vector<std::vector<double>> input_x) override
+	std::vector<int> predict(std::vector<std::vector<double>> const &input_x) override
 	{
 		if (!is_fitted)
 		{
@@ -205,7 +205,7 @@ public:
 		std::cout << std::endl;
 	}
 
-	void print_predictions(std::vector<std::vector<double>> input_x, char style = 'h')
+	void print_predictions(std::vector<std::vector<double>> const &input_x, char style = 'h')
 	{
 		// h = horizontally
 		// v = vertically

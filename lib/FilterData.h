@@ -13,7 +13,7 @@ private:
     int evaluationFinal;
 
     bool beginningGroup = false;
-    std::vector<std::string> columns = {"col1", "col2", "col3", "col4", "col5"};
+    std::vector<std::string> columns;
 
     // used for double comparison
     bool essentiallyEqual(double a, double b, double epsilon)
@@ -306,6 +306,10 @@ private:
     }
 
 public:
+    void set_columns(std::vector<std::string> columns)
+    {
+        this->columns = columns;
+    }
     std::vector<std::vector<std::string>> filter(std::vector<std::vector<std::string>> data, std::vector<std::vector<std::string>> conditions)
     {
         int eval;

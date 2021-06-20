@@ -64,7 +64,7 @@ private:
 		return labels;
 	}
 
-	double get_class_proportion(int target_class, std::vector<int> class_labels)
+	double get_class_proportion(int target_class, std::vector<int> const &class_labels)
 	{
 		double sum = 0;
 		for (int i = 0; i < class_labels.size(); ++i)
@@ -101,7 +101,7 @@ private:
 		return entropy_sum;
 	}
 
-	double column_median(int column_index, std::vector<std::vector<double>> data)
+	double column_median(int column_index, std::vector<std::vector<double>> const &data)
 	{
 		// tranpose column into row
 		std::vector<double> row_data;
@@ -128,7 +128,7 @@ private:
 		return median;
 	}
 
-	std::vector<double> split_feature(int feature_index, std::vector<std::vector<double>> data, std::vector<int> labels, char feature_type)
+	std::vector<double> split_feature(int feature_index, std::vector<std::vector<double>> const &data, std::vector<int> const &labels, char feature_type)
 	{
 		std::vector<int> left_labels;
 		std::vector<int> right_labels;
@@ -219,8 +219,8 @@ private:
 
 	void grow_tree(
 		Node *tree_node,
-		std::vector<std::vector<double>> data,
-		std::vector<int> labels,
+		std::vector<std::vector<double>> const &data,
+		std::vector<int> const &labels,
 		int max_depth,
 		int current_depth,
 		int min_samples_split,
@@ -324,7 +324,7 @@ private:
 	}
 
 	// traversing tree when calling predict()
-	int predict_down(Node *tree_node, std::vector<double> data)
+	int predict_down(Node *tree_node, std::vector<double> const &data)
 	{
 
 		if (tree_node->left == NULL || tree_node->right == NULL)
@@ -344,7 +344,7 @@ private:
 	}
 
 public:
-	DecisionTree(int max_depth = 1000, int min_samples_split = 2, vector<int> *categorical_columns = nullptr) 
+	DecisionTree(int max_depth = 1000, int min_samples_split = 2, std::vector<int> *categorical_columns = nullptr) 
 	: max_depth{max_depth}, min_samples_split{min_samples_split}, categorical_columns{categorical_columns} {}
 
 	Node *root;
@@ -371,8 +371,8 @@ public:
 	}
 
 	void fit(
-		std::vector<std::vector<double>> data, 
-		std::vector<int> labels
+		std::vector<std::vector<double>> const &data, 
+		std::vector<int> const &labels
 		) override
 	{
 
@@ -384,7 +384,7 @@ public:
 		grow_tree(root, data, labels, max_depth, 1, min_samples_split, categorical_columns);
 	}
 
-	std::vector<int> predict(std::vector<std::vector<double>> data) override
+	std::vector<int> predict(std::vector<std::vector<double>> const &data) override
 	{
 		std::vector<int> predictions;
 
@@ -398,7 +398,7 @@ public:
 	}
 
 	// generic methods that apply to all classifiers
-    void print_predictions(std::vector<std::vector<double>> data, char style = 'h')
+    void print_predictions(std::vector<std::vector<double>> const &data, char style = 'h')
     {
         // h = horizontal
         // v = vertical
