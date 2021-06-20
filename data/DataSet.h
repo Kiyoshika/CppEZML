@@ -689,5 +689,46 @@ public:
 		sd.set_columns(this->columns);
 		sd.sort(this->data, sort_conditions);
 	}
+
+	// @param test_ratio The ratio of the test data. Must be in interval (0, 1).
+	// @param train The training data set passed by reference.
+	// @param test The testing data set passed by reference.
+	void split_data(double test_ratio, DataSet *train, DataSet *test) {
+
+		int data_size = this->data.size();
+		int sample_iter = 0;
+		std::unordered_map<int, int> index_map;
+		int test_size;
+		int rand_index;
+
+		DataSet train_temp, test_temp;
+
+		if (test_ratio > 0 && test_ratio < 1) {
+			test_size = (int)(test_ratio * data_size);
+			// populate test data set
+			while (sample_iter < test_size) {
+				rand_index = rand() % data_size;
+				if (index_map.find(rand_index) == index_map.end()) {
+					test_temp.data.push_back(this->data[rand_index]);
+					index_map.insert({ {rand_index, 1} });
+					sample_iter += 1;
+				}
+			}
+
+			// populate train data set by skipping the indices added from test data
+			// probably a better way to go about this, but this is fine for now
+			// could create a vector of test indices and remove it from the vector of 0, ..., data_size to get train indices
+			for (int i = 0; i < data_size; ++i) {
+				if (index_map.find(i) == index_map.end()) {
+					train_temp.data.push_back(this->data[i]);
+				}
+			}
+
+			// override data references with temporary data
+			// this is to allow support for calling split_data on the same object over and over
+			train->data = train_temp.data;
+			test->data = test_temp.data;
+		} else { throw std::invalid_argument("test_ratio parameter must be in interval (0, 1)."); }
+	}
 };
 #endif
