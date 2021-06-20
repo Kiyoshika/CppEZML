@@ -569,9 +569,8 @@ public:
 		std::vector<double> data_double(data_tposed.size());
 		try
 		{
-			std::transform(data_tposed.begin(), data_tposed.end(), data_double.begin(), [](const std::string &val) {
-				return std::stod(val);
-			});
+			std::transform(data_tposed.begin(), data_tposed.end(), data_double.begin(), [](const std::string &val)
+						   { return std::stod(val); });
 		}
 		catch (int e)
 		{
@@ -610,70 +609,80 @@ public:
 		std::cout << std::setfill('-') << std::setw(15 * columns.size() + 15);
 
 		Stats stats;
-		std::cout << "\nSum:" << std::setfill(' ') << std::setw(10) << "|" << "\t";
+		std::cout << "\nSum:" << std::setfill(' ') << std::setw(10) << "|"
+				  << "\t";
 		for (int c = 0; c < columns.size(); ++c)
 		{
 			_sum = stats.sum(this->data, c);
 			print_describe_line(_sum);
 		}
 
-		std::cout << "\nMin:" << std::setfill(' ') << std::setw(10) << "|" << "\t";
+		std::cout << "\nMin:" << std::setfill(' ') << std::setw(10) << "|"
+				  << "\t";
 		for (int c = 0; c < columns.size(); ++c)
 		{
 			_min = stats.min(this->data, c);
 			print_describe_line(_min);
 		}
 
-		std::cout << "\nMax:" << std::setfill(' ') << std::setw(10) << "|" << "\t";
+		std::cout << "\nMax:" << std::setfill(' ') << std::setw(10) << "|"
+				  << "\t";
 		for (int c = 0; c < columns.size(); ++c)
 		{
 			_max = stats.max(this->data, c);
 			print_describe_line(_max);
 		}
 
-		std::cout << "\nMean:" << std::setfill(' ') << std::setw(9) << "|" << "\t";
+		std::cout << "\nMean:" << std::setfill(' ') << std::setw(9) << "|"
+				  << "\t";
 		for (int c = 0; c < columns.size(); ++c)
 		{
 			_mean = stats.mean(this->data, c);
 			print_describe_line(_mean);
 		}
 
-		std::cout << "\nStDev:" << std::setfill(' ') << std::setw(8) << "|" << "\t";
+		std::cout << "\nStDev:" << std::setfill(' ') << std::setw(8) << "|"
+				  << "\t";
 		for (int c = 0; c < columns.size(); ++c)
 		{
 			_stdev = stats.stdev(this->data, c);
 			print_describe_line(_stdev);
 		}
 
-		std::cout << "\n10th %:" << std::setfill(' ') << std::setw(7) << "|" << "\t";
+		std::cout << "\n10th %:" << std::setfill(' ') << std::setw(7) << "|"
+				  << "\t";
 		for (int c = 0; c < columns.size(); ++c)
 		{
 			_10p = stats.percentile(this->data, c, 0.1);
 			print_describe_line(_10p);
 		}
 
-		std::cout << "\n25th %:" << std::setfill(' ') << std::setw(7) << "|" << "\t";
+		std::cout << "\n25th %:" << std::setfill(' ') << std::setw(7) << "|"
+				  << "\t";
 		for (int c = 0; c < columns.size(); ++c)
 		{
 			_25p = stats.percentile(this->data, c, 0.25);
 			print_describe_line(_25p);
 		}
 
-		std::cout << "\nMedian:" << std::setfill(' ') << std::setw(7) << "|" << "\t";
+		std::cout << "\nMedian:" << std::setfill(' ') << std::setw(7) << "|"
+				  << "\t";
 		for (int c = 0; c < columns.size(); ++c)
 		{
 			_median = stats.median(this->data, c);
 			print_describe_line(_median);
 		}
 
-		std::cout << "\n75th %:" << std::setfill(' ') << std::setw(7) << "|" << "\t";
+		std::cout << "\n75th %:" << std::setfill(' ') << std::setw(7) << "|"
+				  << "\t";
 		for (int c = 0; c < columns.size(); ++c)
 		{
 			_75p = stats.percentile(this->data, c, 0.75);
 			print_describe_line(_75p);
 		}
 
-		std::cout << "\n90th %:" << std::setfill(' ') << std::setw(7) << "|" << "\t";
+		std::cout << "\n90th %:" << std::setfill(' ') << std::setw(7) << "|"
+				  << "\t";
 		for (int c = 0; c < columns.size(); ++c)
 		{
 			_90p = stats.percentile(this->data, c, 0.90);
@@ -693,7 +702,8 @@ public:
 	// @param test_ratio The ratio of the test data. Must be in interval (0, 1).
 	// @param train The training data set passed by reference.
 	// @param test The testing data set passed by reference.
-	void split_data(double test_ratio, DataSet *train, DataSet *test) {
+	void split_data(double test_ratio, DataSet *train, DataSet *test)
+	{
 
 		int data_size = this->data.size();
 		int sample_iter = 0;
@@ -703,14 +713,17 @@ public:
 
 		DataSet train_temp, test_temp;
 
-		if (test_ratio > 0 && test_ratio < 1) {
+		if (test_ratio > 0 && test_ratio < 1)
+		{
 			test_size = (int)(test_ratio * data_size);
 			// populate test data set
-			while (sample_iter < test_size) {
+			while (sample_iter < test_size)
+			{
 				rand_index = rand() % data_size;
-				if (index_map.find(rand_index) == index_map.end()) {
+				if (index_map.find(rand_index) == index_map.end())
+				{
 					test_temp.data.push_back(this->data[rand_index]);
-					index_map.insert({ {rand_index, 1} });
+					index_map.insert({{rand_index, 1}});
 					sample_iter += 1;
 				}
 			}
@@ -718,8 +731,10 @@ public:
 			// populate train data set by skipping the indices added from test data
 			// probably a better way to go about this, but this is fine for now
 			// could create a vector of test indices and remove it from the vector of 0, ..., data_size to get train indices
-			for (int i = 0; i < data_size; ++i) {
-				if (index_map.find(i) == index_map.end()) {
+			for (int i = 0; i < data_size; ++i)
+			{
+				if (index_map.find(i) == index_map.end())
+				{
 					train_temp.data.push_back(this->data[i]);
 				}
 			}
@@ -728,7 +743,62 @@ public:
 			// this is to allow support for calling split_data on the same object over and over
 			train->data = train_temp.data;
 			test->data = test_temp.data;
-		} else { throw std::invalid_argument("test_ratio parameter must be in interval (0, 1)."); }
+		}
+		else
+		{
+			throw std::invalid_argument("test_ratio parameter must be in interval (0, 1).");
+		}
+	}
+
+	// @param file_name The name of the CSV file (without the .csv extension).
+	// @param sep The separator/delimiter of the CSV file.
+	// @param print_header Whether or not to include the column names in the CSV file.
+	void to_csv(std::string file_name, std::string sep = ",", bool print_header = true)
+	{
+		std::string full_file_name = file_name + ".csv";
+		std::ofstream ofile;
+		ofile.open(full_file_name);
+		std::string write_string = "";
+
+		// write column names to CSV file (optional)
+		if (print_header)
+		{
+			for (int h = 0; h < this->columns.size(); ++h)
+			{
+				// don't add separator for last column
+				if (h == this->columns.size() - 1)
+				{
+					ofile << this->columns[h];
+				}
+				else
+				{
+					ofile << this->columns[h] << sep;
+				}
+			}
+
+			ofile << "\n";
+		}
+
+
+		for (int row = 0; row < this->data.size(); ++row)
+		{
+			for (int col = 0; col < this->data[0].size(); ++col)
+			{
+				if (col == this->data[0].size() - 1)
+				{
+					// don't add separator for last column
+					write_string += this->data[row][col];
+				}
+				else
+				{
+					write_string += this->data[row][col] + sep;
+				}
+			}
+			
+			ofile << write_string << "\n";
+			write_string = "";
+		}
+		ofile.close();
 	}
 };
 #endif
