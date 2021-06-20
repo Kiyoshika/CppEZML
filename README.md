@@ -2,17 +2,12 @@
 A work in progress C++ machine learning library designed to be very easy to use. Everything pretty much written from scratch.
 
 # Latest Release
-## v0.3.0 -- 14 March 2021 (Happy Pi Day!)
+## v0.4.0 -- 19 June 2021
 #### What's new in v0.3.0?
-* Finished implementing DecisionTree
-* Created abstract classes for classifiers and regressors to help with organization
-* Implemented logistic regression
-* Added "on the fly" conversions on DataSet class such as data.cast_data_double(), data.cast_target_int(), etc.
-* Added early stopping in linear/logistic regression to improve fit times
-* Completely reworked filtering algorithm to support more sophisticated conditions (needs stress testing)
-* Added f1 score to classifiers
-* Now supporting multi-character delimiters (previously only supported one character)
-* Users can now pass custom loss functions to regressors/classifiers
+* Slight model optimizations
+* Prettified the output of head()
+* append(), rename(), describe(), split_data(), to_csv(), sample()
+* Statistical functions: mean(), max(), min(), etc.
 
 # What's the roadmap?
 See "Milestones" under the "Issues" tab for a rough roadmap of the upcoming releases.
