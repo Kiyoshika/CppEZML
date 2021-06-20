@@ -3,7 +3,7 @@ A work in progress C++ machine learning library designed to be very easy to use.
 
 # Latest Release
 ## v0.4.0 -- 19 June 2021
-#### What's new in v0.3.0?
+#### What's new in v0.4.0?
 * Slight model optimizations
 * Prettified the output of head()
 * append(), rename(), describe(), split_data(), to_csv(), sample()
