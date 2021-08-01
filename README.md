@@ -12,7 +12,18 @@ A work in progress C++ machine learning library designed to be very easy to use.
 # Latest Update (Dev Work)
 ## v0.5.0.1 -- 01 August 2021
 #### What's being worked on in v0.5.0.1?
+Finished:
 * Implemented KMeans clustering
+* Implemented KNN classification
+* Added transpose() in DataSet
+* Can now load() 1D vectors in DataSet
+Upcoming:
+* Random Forest classification
+* Kernel Density Estimation
+* Naive Bayes classification
+* Kernel regression
+* K-Fold Cross Validation
+* And more...
 
 # What's the roadmap?
 See "Milestones" under the "Issues" tab for a rough roadmap of the upcoming releases.
