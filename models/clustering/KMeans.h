@@ -9,18 +9,31 @@
 class KMeans : public Cluster {
     private:
         int k, total_iterations = 0, max_iter;
+        bool computed_centroids = false; // false on first iteration, then set to true after computing new centroids via means
 
         std::unordered_map<int, int> centroid_map;
-        std::unordered_map<int, std::vector<std::vector<double>>> cluster_map;
         
+        // store indices of cluster centroids
         std::vector<int> centroid_index_vec;
-        std::vector<int> cluster_vec;
+        // assigning clusters to data points that are the closest to some centroid
+        std::vector<int> assigned_clusters;
+        // used to compare with newly-assigned clusters for consistent_output_check
+        std::vector<int> previous_clusters;
         
         // used when computing means for new centroids
-        std::vector<std::vector<double>> cluster_points;
+        // key = cluster, value = data point
+        std::unordered_map<int, std::vector<std::vector<double>>> cluster_point_map;
+
+        // the new "predicted" centroids per data point after completing the iteration
+        // key = cluster, value = data point
+        std::unordered_map<int, std::vector<double>> new_centroids;
+
+        // used to store distances between data points and centroids
+        std::vector<double> distance_vec;
         
         bool initial_clusters_created = false;
 
+        // on first iteration of fit(), randomly choose k centroids
         void initial_clusters(std::vector<std::vector<double>> const& data)
         {
             int data_size = data.size();
@@ -64,6 +77,7 @@ class KMeans : public Cluster {
             if (max_iter < 1) { throw std::invalid_argument("Algorithm must have at least one iteration."); }
         }
 
+        int argmin_index;
         std::vector<int> fit(std::vector<std::vector<double>> const& data) override
         {
             // generate random centroids
@@ -73,80 +87,70 @@ class KMeans : public Cluster {
                 this->initial_clusters_created = true;
             }
 
-            // iterate over data and assign clusters
-            std::vector<int> cluster_vec_copy = this->cluster_vec; // take current snapshot of the clusters
-            std::vector<double> cluster_point;
-            std::vector<double> distance_vec;
-            int cluster_argmin;
+            if (assigned_clusters.size() > 0) { previous_clusters = assigned_clusters; }
+            assigned_clusters.clear();
+            // iterate over data and find closest centroid
             for (int i = 0; i < data.size(); ++i)
             {
+                // check distance to each centroid
                 distance_vec.clear();
-
-                for (int c = 0; c < k; ++c)
+                for (int c = 0; c < this->k; ++c)
                 {
-                    // cluster_points will be populated when re-adjusting centroids
-                    // this first condition is the special case for the first iteration of the algorithm (random centroids)
-                    if (this->cluster_points.size() == 0)
+                    if (!computed_centroids) // if first iteration
                     {
-                        cluster_point = data[this->centroid_index_vec[c]];
+                        distance_vec.push_back(get_distance(data[i], data[centroid_index_vec[c]]));
                     }
-                    else
+                    else // all other iterations (after centroids are computed via means)
                     {
-                        cluster_point = this->cluster_points[c];
-                    }
-                    distance_vec.push_back(get_distance(data[i], cluster_point));
-                    // after distances are obtained, clear the cluster points
-                    this->cluster_points.clear();
-                }
-
-                // argmin for distance vector
-                cluster_argmin = std::distance(distance_vec.begin(), std::min_element(distance_vec.begin(), distance_vec.end()));
-                this->cluster_vec.push_back(cluster_argmin);
-                this->cluster_map[cluster_argmin].push_back(data[i]);
-            }
-
-            bool matching_clusters = false;
-            if (cluster_vec_copy.size() > 0)
-            {
-                // compare clusters and check any changes
-                for (int i = 0; i < cluster_vec_copy.size(); ++i)
-                {
-                    if (cluster_vec_copy[i] != this->cluster_vec[i])
-                    {
-                        matching_clusters = false;
-                        break;
+                        distance_vec.push_back(get_distance(data[i], new_centroids[c]));
                     }
                 }
+                argmin_index = std::distance(distance_vec.begin(), std::min_element(distance_vec.begin(), distance_vec.end()));
+                assigned_clusters.push_back(argmin_index);
             }
 
-            if (!matching_clusters)
+            // check for early termination (if output is equal to prior output, then we "converged")
+            if (assigned_clusters == previous_clusters) { return assigned_clusters; }
+
+            // partition data on newly-assigned clusters
+            int get_cluster;
+            cluster_point_map.clear();
+            for (int i = 0; i < data.size(); ++i)
             {
-                // if cluster assignments have changed, re compute centroids by taking means and refit
-                double mean;
-                for (int c = 0; c < k; ++c)
+                get_cluster = assigned_clusters[i];
+                cluster_point_map[get_cluster].push_back(data[i]);
+            }
+
+            // take partitioned data and compute means
+            std::vector<double> new_computed_centroid;
+            double sum;
+            new_centroids.clear();
+            for (int c = 0; c < this->k; ++c)
+            {
+                new_computed_centroid.clear();
+                sum = 0;
+                for (int col = 0; col < cluster_point_map[c][0].size(); ++col)
                 {
-                    this->cluster_points.push_back(std::vector<double>());
-                    for (int col = 0; col < this->cluster_map[c][0].size(); ++col)
+                    for (int row = 0; row < cluster_point_map[c].size(); ++row)
                     {
-                        mean = 0;
-                        for (int row = 0; row < this->cluster_map[c].size(); ++row)
-                        {
-                            mean += this->cluster_map[c][row][col];
-                        }
-                        this->cluster_points[c].push_back(mean / this->cluster_map[c].size());
+                        sum += cluster_point_map[c][row][col];
                     }
+                    new_computed_centroid.push_back(sum / cluster_point_map[c].size());
+                    sum = 0;
                 }
-                total_iterations += 1;
+                // add new computed centroid
+                new_centroids[c] = new_computed_centroid;
             }
+            // new centroids have been computed via means
+            this->computed_centroids = true;
+            this->total_iterations += 1;
 
-            if (total_iterations < max_iter)
+            if (this->total_iterations < this->max_iter)
             {
-                // empty current "predictions" when re-iterating algorithm
-                this->cluster_vec.clear();
-                fit(data); 
+                fit(data);
             }
 
-            return this->cluster_vec;
+            return this->assigned_clusters;
         }
 };
 #endif
