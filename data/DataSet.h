@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <unordered_map>
 #include <iomanip>
+#include <type_traits>
 
 #include "../lib/FilterData.h"
 #include "../lib/SortData.h"
@@ -171,6 +172,98 @@ public:
 	{
 		this->data = data;
 		this->columns = columns;
+	}
+
+	// load from another 1D data set with columns (will be translated into row vector)
+	void load(std::vector<int> data, std::vector<std::string> columns) // overload 1 (int)
+	{
+		std::vector<std::vector<std::string>> new_data;
+		new_data.push_back(std::vector<std::string>());
+
+		for (int i = 0; i < data.size(); ++i)
+		{
+			new_data[0].push_back(std::to_string(data[i]));
+		}
+
+
+		this->data = new_data;
+		this->columns = columns;
+	}
+
+	void load(std::vector<double> data, std::vector<std::string> columns) // overload 2 (double)
+	{
+		std::vector<std::vector<std::string>> new_data;
+		new_data.push_back(std::vector<std::string>());
+
+		for (int i = 0; i < data.size(); ++i)
+		{
+			new_data[0].push_back(std::to_string(data[i]));
+		}
+
+
+		this->data = new_data;
+		this->columns = columns;
+	}
+
+	void load(std::vector<std::string> data, std::vector<std::string> columns) // overload 3 (string)
+	{
+		std::vector<std::vector<std::string>> new_data;
+		new_data.push_back(std::vector<std::string>());
+
+		for (int i = 0; i < data.size(); ++i)
+		{
+			new_data[0].push_back(data[i]);
+		}
+
+
+		this->data = new_data;
+		this->columns = columns;
+	}
+
+	// load from another 1D data set with columns (will be translated into column vector)
+	void load(std::vector<int> data, std::string column_name) // overload 1 (int)
+	{
+		std::vector<std::vector<std::string>> new_data;
+		for (int i = 0; i < data.size(); ++i)
+		{
+			new_data.push_back(std::vector<std::string>());
+			new_data[i].push_back(std::to_string(data[i]));
+		}
+
+		// create default column
+		std::vector<std::string> new_column = { column_name };
+		this->data = new_data;
+		this->columns = new_column;
+	}
+
+	void load(std::vector<double> data, std::string column_name) // overload 2 (double)
+	{
+		std::vector<std::vector<std::string>> new_data;
+		for (int i = 0; i < data.size(); ++i)
+		{
+			new_data.push_back(std::vector<std::string>());
+			new_data[i].push_back(std::to_string(data[i]));
+		}
+
+		// create default column
+		std::vector<std::string> new_column = { column_name };
+		this->data = new_data;
+		this->columns = new_column;
+	}
+
+	void load(std::vector<std::string> data, std::string column_name) // overload 3 (string)
+	{
+		std::vector<std::vector<std::string>> new_data;
+		for (int i = 0; i < data.size(); ++i)
+		{
+			new_data.push_back(std::vector<std::string>());
+			new_data[i].push_back(data[i]);
+		}
+
+		// create default column
+		std::vector<std::string> new_column = { column_name };
+		this->data = new_data;
+		this->columns = new_column;
 	}
 
 	void head(int rows = 10)
@@ -799,6 +892,53 @@ public:
 			write_string = "";
 		}
 		ofile.close();
+	}
+
+
+	// @param modify_inline if true, will modify the DataSet object in place and not return anything. Otherwise, will return a new DataSet object with data transposed.
+	// Note that column names will be reset after transposing.
+	DataSet transpose(bool modify_inplace = false)
+	{
+		std::vector<std::vector<std::string>> transposed_data;
+		// size the transposed_data to the opposite dimensions of the original data
+		// R x C will become C x R size
+		
+		for (int col = 0; col < this->data[0].size(); ++col)
+		{
+			transposed_data.push_back(std::vector<std::string>());
+			for (int row = 0; row < this->data.size(); ++row)
+			{
+				transposed_data[col].push_back("");
+			}
+		}
+
+		// iterate over original data and swap indices
+		for (int row = 0; row < this->data.size(); ++row)
+		{
+			for (int col = 0; col < this->data[0].size(); ++col)
+			{
+				transposed_data[col][row] = this->data[row][col];
+			}
+		}
+
+		// reset columns after transposing
+		std:vector<std::string> new_columns;
+		for (int row = 0; row < this->data.size(); ++row)
+		{
+			new_columns.push_back("col" + std::to_string(row));
+		}
+
+		DataSet TransposedData;
+		TransposedData.load(transposed_data, new_columns);
+
+		// if modifying inplace, replace current reference for data/columns.
+		if (modify_inplace)
+		{
+			this->data = transposed_data;
+			this->columns = new_columns;
+		}
+
+		return TransposedData;
 	}
 };
 #endif
