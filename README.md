@@ -17,9 +17,11 @@ Finished:
 * Implemented KNN classification
 * Added transpose() in DataSet
 * Can now load() 1D vectors in DataSet
+* Can now use Stats methods on 1D vectors
+* Kernel Density Estimation
+
 Upcoming:
 * Random Forest classification
-* Kernel Density Estimation
 * Naive Bayes classification
 * Kernel regression
 * K-Fold Cross Validation
