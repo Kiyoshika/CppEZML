@@ -9,6 +9,11 @@ A work in progress C++ machine learning library designed to be very easy to use.
 * append(), rename(), describe(), split_data(), to_csv(), sample()
 * Statistical functions: mean(), max(), min(), etc.
 
+# Latest Update (Dev Work)
+## v0.5.0.1 -- 01 August 2021
+#### What's being worked on in v0.5.0.1?
+* Implemented KMeans clustering
+
 # What's the roadmap?
 See "Milestones" under the "Issues" tab for a rough roadmap of the upcoming releases.
 
