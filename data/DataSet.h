@@ -940,5 +940,102 @@ public:
 
 		return TransposedData;
 	}
+
+	void countna()
+	{
+		int counter;
+		std::cout << "column name : null count\n--------------------------\n";
+
+		for (int col = 0; col < this->columns.size(); ++col)
+		{
+			counter = 0;
+			for (int row = 0; row < this->data.size(); ++row)
+			{
+				if (this->data[row][col] == "") { counter += 1; }
+			}
+			std::cout << this->columns[col] << " : " << counter << "\n";
+		}
+	}
+
+	// returns a vector of null counts (index corresponds to column index)
+	std::vector<int> countna_vector()
+	{
+		int counter;
+		std::vector<int> na_count;
+
+		for (int col = 0; col < this->columns.size(); ++col)
+		{
+			counter = 0;
+			for (int row = 0; row < this->data.size(); ++row)
+			{
+				if (this->data[row][col] == "") { counter += 1; }
+			}
+			na_count.push_back(counter);
+		}
+
+		return na_count;
+	}
+
+	DataSet dropna(bool inplace = false)
+	{
+		DataSet subset;
+		std::vector<std::vector<std::string>> new_data;
+
+		bool contains_na = false;
+		
+		for (int row = 0; row < this->data.size(); ++row)
+		{
+			for (int col = 0; col < this->columns.size(); ++col)
+			{
+				if (this->data[row][col]  == "") { contains_na = true; }
+			}
+			// if no null values present, copy row into new data set
+			if (!contains_na) {
+				new_data.push_back(this->data[row]);
+			}
+
+			// reset flag
+			contains_na = false;
+		}
+
+		// modify inplace (optional)
+		if (inplace)
+		{
+			this->data = new_data;
+		}
+
+		// construct new subset and return
+		subset.load(new_data, this->columns);
+		return subset;
+
+	}
+
+	void replacena(const std::string replace_text)
+	{
+		for (int rows = 0; rows < this->data.size(); ++rows)
+		{
+			for (int cols = 0; cols < this->data[0].size(); ++cols)
+			{
+				if (this->data[rows][cols] == "")
+				{
+					this->data[rows][cols] = replace_text;
+				}
+			}
+		}
+	}
+
+	void replace(const std::string prior_text, const std::string replace_text)
+	{
+		for (int rows = 0; rows < this->data.size(); ++rows)
+		{
+			for (int cols = 0; cols < this->data[0].size(); ++cols)
+			{
+				if (this->data[rows][cols] == prior_text)
+				{
+					this->data[rows][cols] = replace_text;
+				}
+			}
+		}
+	}
 };
 #endif
