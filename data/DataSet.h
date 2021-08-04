@@ -350,7 +350,7 @@ public:
 
 		std::vector<std::vector<std::string>> new_data;
 
-		for (int r = 0; r < data.size() - 1; ++r)
+		for (int r = 0; r < data.size(); ++r)
 		{
 			new_data.push_back(std::vector<std::string>());
 			for (int c = 0; c < new_size; ++c)
@@ -385,7 +385,7 @@ public:
 
 		std::vector<std::vector<std::string>> new_data;
 
-		for (int r = 0; r < data.size() - 1; ++r)
+		for (int r = 0; r < data.size(); ++r)
 		{
 			new_data.push_back(std::vector<std::string>());
 			for (int c = 0; c < new_size; ++c)

@@ -10,7 +10,7 @@ A work in progress C++ machine learning library designed to be very easy to use.
 * Statistical functions: mean(), max(), min(), etc.
 
 # Latest Update (Dev Work)
-## v0.5.0.1 -- 01 August 2021
+## v0.5.0.1 -- 03 August 2021
 #### What's being worked on in v0.5.0.1?
 Finished:
 * Implemented KMeans clustering
@@ -20,10 +20,12 @@ Finished:
 * 1D vectors now supported in Stats class
 * Kernel Density Estimation
 * dropna(), replacena(), countna(), replace()
+* Fixed bug in select() which dropped the last record
+* Added Kernel Naive Bayes classifier
 
 Upcoming:
 * Random Forest classification
-* Naive Bayes classification
+* Gaussian Naive Bayes classification (Kernel NB added)
 * Kernel regression
 * K-Fold Cross Validation
 * And more...
