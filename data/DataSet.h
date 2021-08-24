@@ -400,6 +400,26 @@ public:
 		return subset;
 	}
 
+	// for special cases to use select() on <double> 2D vectors outside the class
+	// without having to create an object
+	static std::vector<std::vector<double>> select_ext(std::vector<std::vector<double>> const& data, std::vector<int> const& indices)
+	{
+		int new_size = indices.size();
+
+		std::vector<std::vector<double>> subset;
+
+		for (int r = 0; r < data.size(); ++r)
+		{
+			subset.push_back(std::vector<double>());
+			for (int c = 0; c < new_size; ++c)
+			{
+				subset[r].push_back(data[r][indices[c]]);
+			}
+		}
+
+		return subset;
+	}
+
 	// return subset of original data filtered by conditions
 	DataSet filter(std::vector<std::vector<std::string>> conditions)
 	{
@@ -558,6 +578,21 @@ public:
 		return sampled;
 	}
 
+	// for special cases to use sample() on <int> 2D vectors outside the class
+	static std::vector<std::vector<double>> sample_ext(std::vector<std::vector<double>> const& data)
+	{
+		std::vector<std::vector<double>> resampled_data;
+		int rand_index;
+		for (int i = 0; i < data.size(); ++i)
+		{
+			resampled_data.push_back(std::vector<double>());
+			rand_index = rand() % data.size();
+			resampled_data[i] = data[rand_index];
+		}
+
+		return resampled_data;
+	}
+
 	/*
 	@param other_data DataSet to append
 	@param type Append on rows ('r') or columns ('r')
@@ -654,6 +689,38 @@ public:
 		}
 
 		return tposed;
+	}
+
+	std::vector<std::vector<std::string>> transpose(std::vector<std::vector<std::string>> const& data)
+	{
+		std::vector<std::vector<std::string>> transposed_data(data[0].size(), std::vector<std::string>());
+
+		for (int i = 0; i < data.size(); i++)
+		{
+			for (int j = 0; j < data[i].size(); j++)
+			{
+				transposed_data[j].push_back(data[i][j]);
+			}
+		}
+
+		return transposed_data;
+	}
+
+	// for special cases to use with <double> 2D vectors outside the class
+	template <typename intdouble>
+	static std::vector<std::vector<intdouble>> transpose_ext(std::vector<std::vector<intdouble>> const& data)
+	{
+		std::vector<std::vector<intdouble>> transposed_data(data[0].size(), std::vector<intdouble>());
+
+		for (int i = 0; i < data.size(); i++)
+		{
+			for (int j = 0; j < data[i].size(); j++)
+			{
+				transposed_data[j].push_back(data[i][j]);
+			}
+		}
+
+		return transposed_data;
 	}
 
 	std::vector<double> transpose_double(int col_index)
