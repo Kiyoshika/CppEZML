@@ -10,7 +10,7 @@ A work in progress C++ machine learning library designed to be very easy to use.
 * Statistical functions: mean(), max(), min(), etc.
 
 # Latest Update (Dev Work)
-## v0.5.0.1 -- 23 August 2021
+## v0.5.0.1 -- 27 August 2021
 #### What's being worked on in v0.5.0.1?
 Finished:
 * Implemented KMeans clustering
@@ -24,9 +24,9 @@ Finished:
 * Added Kernel Naive Bayes classifier
 * Added Gaussian Naive Bayes classifier
 * Added some static methods in DataSet to use select(), transpose() etc. with double-type 2D vectors
+* Random Forest Classification (need to rewrite Decision Tree class better)
 
 Upcoming:
-* Random Forest classification (in progress)
 * Kernel regression
 * K-Fold Cross Validation
 * drop() method in DataSet

@@ -10,7 +10,7 @@
 class RandomForest : public Classifier {
     private:
         // The maximum amount of columns to randomly sample from the data set
-        // Will by default be log(n) where n is the number of columns (after calling fit())
+        // Will by default be sqrt(n) where n is the number of columns (after calling fit())
         int max_column_sample;
 
         // Number of trees to "grow" in the forest
@@ -19,11 +19,11 @@ class RandomForest : public Classifier {
         // when calling fit(), a tree is created with the random subsets
         // and stored inside this dictionary.
         // key = tree_n (the n-th tree), value = a fit decision tree
-        std::unordered_map<int, DecisionTree*> decision_tree_dictionary;
+        std::vector<DecisionTree> decision_tree_vector;
 
         // each tree randomly selects columns (features)
         // keep track of which columns were selected for which tree
-        std::unordered_map<int, std::vector<int>> selected_columns;
+        std::vector<std::vector<int>> selected_columns;
 
         // get the mode of an integer vec
         int mode(std::vector<int> const& data)
@@ -37,30 +37,17 @@ class RandomForest : public Classifier {
 
             std::map<int,int>::iterator mode_map_counter
                 = std::max_element(mode_map.begin(),mode_map.end(),[] (const std::pair<int,int>& a, const std::pair<int,int>& b)->bool{ return a.second < b.second; } );
-        std::cout << "MODE: " << mode_map_counter->first << "\n";
         return mode_map_counter->first;
         }
 
     public:
         RandomForest(int max_column_sample = -1, int forest_size = 100) : max_column_sample{max_column_sample}, forest_size{forest_size} {}
-        
-        ~RandomForest()
-        {
-            // empty decision_tree_dictionary which stores pointers to DecisionTree()
-            if (decision_tree_dictionary.size() > 0)
-            {
-                for (int i = 0; i < decision_tree_dictionary.size(); ++i)
-                {
-                    delete decision_tree_dictionary[i];
-                }
-            }
-        }
 
         void fit(std::vector<std::vector<double>> const& data, std::vector<int> const& target) override
         {
-            // set max_column_sample to log(n) if it was not provided in constructor
-            // NOTE: using + 1 incase the log(n) evaluates to zero (you can't sample zero columns...)
-            if (max_column_sample == -1) { max_column_sample = (int)log(data[0].size() + 1); }
+            // set max_column_sample to sqrt(n) if it was not provided in constructor
+            if (max_column_sample == -1) { max_column_sample = (int)sqrt(data[0].size()); }
+            if (max_column_sample > data[0].size()) { throw std::invalid_argument("max_column_sample cannot be larger than the column size."); }
 
             // random seed
             srand(time(NULL));
@@ -84,18 +71,25 @@ class RandomForest : public Classifier {
                 }
 
                 // convert current data to data set in order to select relevant columns
-
                 std::vector<std::vector<double>> subset = DataSet::select_ext(data, unique_column_indices);
 
                 // resample subset with replacement to increase the variation in sample data (bootstrapping)
-                subset = DataSet::sample_ext(data);
-     
-                // insert pointer to DecisionTree and fit on subset
-                decision_tree_dictionary.insert(std::make_pair(tree_n, new DecisionTree()));
-                decision_tree_dictionary[tree_n]->fit(subset, target);
+                //subset = DataSet::sample_ext(data); -- need to also resample the y target with same indices
+                std::vector<std::vector<double>> resampled_subset;
+                std::vector<int> resampled_target;
+                int randIndex;
+                for (int i = 0; i < subset.size(); ++i)
+                {
+                    randIndex = rand() % subset.size();
+                    resampled_subset.push_back(subset[i]);
+                    resampled_target.push_back(target[i]);
+                }
+
+                decision_tree_vector.push_back(DecisionTree());
+                decision_tree_vector[tree_n].fit(resampled_subset, resampled_target);
 
                 // record which columns were selected
-                selected_columns.insert(std::make_pair(tree_n, unique_column_indices));
+                selected_columns.push_back(unique_column_indices);
             }
         }
 
@@ -114,13 +108,12 @@ class RandomForest : public Classifier {
             {
                 // select the same columns from fit()
                 subset = DataSet::select_ext(data, selected_columns[tree_n]);
-                std::cout << "Iter #" << tree_n << ": size: " << decision_tree_dictionary.at(tree_n)->predict(subset).size() << "\n";
-                //prediction_vector_matrix.push_back(tree_predictions);
+                tree_predictions = decision_tree_vector[tree_n].predict(subset);
+                prediction_vector_matrix.push_back(tree_predictions);
             }
 
             // tranpose prediction matrix so that each ROW is a data point
-            //prediction_vector_matrix = DataSet::transpose_ext(prediction_vector_matrix);
-            std::cout << prediction_vector_matrix.size() << "\n";
+            prediction_vector_matrix = DataSet::transpose_ext(prediction_vector_matrix);
 
             // iterate over prediction matrix and take the mode of each row which is
             // the "ensemble" prediction for each data point
