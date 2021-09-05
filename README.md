@@ -32,6 +32,9 @@ Finished (v0.5.0.1):
 * Added some static methods in DataSet to use select(), transpose() etc. with double-type 2D vectors
 * Random Forest Classification (need to rewrite Decision Tree class better)
 
+Finished (v0.6.0):
+* Overhauled filter(); Removed FilterData.h
+
 In Progress (v0.6.0):
 * Overhauling DataSet.h; moving away from vector<vector<...>>
 
