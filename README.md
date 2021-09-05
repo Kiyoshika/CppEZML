@@ -46,4 +46,4 @@ Upcoming:
 See "Milestones" under the "Issues" tab for a rough roadmap of the upcoming releases.
 
 # Documentation
-I'm hosting my documentation here: https://zweaver.bit.ai/docs/view/WFbv5TFLT9NoJ6mp
+I will be reworking the documentation after the release of v0.6.0. Probably going to use GitHub pages.
