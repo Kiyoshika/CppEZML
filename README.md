@@ -1,6 +1,10 @@
 # CppEZML
 A work in progress C++ machine learning library designed to be very easy to use. Everything pretty much written from scratch.
 
+NOTICE: This library is still heavily in development and NOT recommended for production use (or even recreational use at this point).
+
+This library may become more stable around v0.8.0 or afterwards...
+
 # Latest Release
 ## v0.4.0 -- 19 June 2021
 #### What's new in v0.4.0?
@@ -10,9 +14,11 @@ A work in progress C++ machine learning library designed to be very easy to use.
 * Statistical functions: mean(), max(), min(), etc.
 
 # Latest Update (Dev Work)
-## v0.5.0.1 -- 29 August 2021
-#### What's being worked on in v0.5.0.1?
-Finished:
+## v0.6.0 -- 05 September 2021
+v0.5.0.1 is remaining unreleased due to the plan to overhaul DataSet.h, so it's being merged into v0.6.0 before release.
+
+#### What's being worked on in v0.6.0?
+Finished (v0.5.0.1):
 * Implemented KMeans clustering
 * Implemented KNN classification
 * Added transpose() in DataSet
@@ -26,10 +32,11 @@ Finished:
 * Added some static methods in DataSet to use select(), transpose() etc. with double-type 2D vectors
 * Random Forest Classification (need to rewrite Decision Tree class better)
 
-In Progress:
+In Progress (v0.6.0):
 * Overhauling DataSet.h; moving away from vector<vector<...>>
 
 Upcoming:
+* Fix the memory leak in DecisionTree.h
 * Kernel regression
 * K-Fold Cross Validation
 * drop() method in DataSet
