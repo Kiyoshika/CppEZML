@@ -14,3 +14,6 @@ ytest.csv
 .ipynb_checkpoints/
 generate_data.ipynb
 stress_test100k.csv
+small_classification_test.csv
+DataSetNew.cpp
+dsn.exe
