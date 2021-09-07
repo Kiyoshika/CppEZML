@@ -1,5 +1,5 @@
-#ifndef SORTDATA_H
-#define SORTDATA_H
+#ifndef SORTDATA_HPP
+#define SORTDATA_HPP
 
 #include <stdexcept>
 #include <vector>

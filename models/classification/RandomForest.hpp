@@ -1,12 +1,12 @@
-#ifndef RANDOMFOREST_H
-#define RANDOMFOREST_H
+#ifndef RANDOMFOREST_HPP
+#define RANDOMFOREST_HPP
 #include <time.h>
 #include <math.h>
 #include <algorithm>
 #include <unordered_map>
 #include <map>
-#include "DecisionTree.h"
-#include "../../data/DataSet.h"
+#include "DecisionTree.hpp"
+#include "../../data/DataSet.hpp"
 class RandomForest : public Classifier {
     private:
         // The maximum amount of columns to randomly sample from the data set

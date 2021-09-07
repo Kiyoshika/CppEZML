@@ -1,4 +1,4 @@
-#include "data/DataSet.h"
+#include "data/DataSet.hpp"
 
 
 int main()
@@ -20,8 +20,7 @@ int main()
     */
 
     // load data as strings
-    DataSet<std::string> mydata;
-    mydata.load("small_classification_test.csv");
+    DataSet<std::string> mydata("small_classification_test.csv");
 
     // convert entire data set to double
     DataSet<double> mydata_double = mydata.cast<double>();

@@ -1,5 +1,5 @@
-#ifndef REGRESSOR_H
-#define REGRESSOR_H
+#ifndef REGRESSOR_HPP
+#define REGRESSOR_HPP
 #include <vector>
 #include <math.h>
 // Base class for all regressors. Contains metrics and such that's common among all models

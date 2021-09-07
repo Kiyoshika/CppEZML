@@ -1,4 +1,4 @@
-#include "data/DataSet.h"
+#include "data/DataSet.hpp"
 
 int main()
 {
@@ -12,11 +12,10 @@ int main()
     */
 
     // load data as strings
-    DataSet<std::string> mydata;
-    mydata.load("example_data.csv");
+    DataSet<std::string> mydata("example_data.csv");
 
     // column indices that we want to select
-    std::vector<int> idx = {0, 2};
+    std::vector<size_t> idx = {0, 2};
     
     // subset the column of same data type (strings)
     DataSet<std::string> string_subset = mydata.select<std::string>(idx);

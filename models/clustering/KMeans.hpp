@@ -1,11 +1,11 @@
-#ifndef KMEANS_H
-#define KMEANS_H
+#ifndef KMEANS_HPP
+#define KMEANS_HPP
 #include <iostream>
 #include <vector>
 #include <unordered_map>
 #include <math.h>
 #include <algorithm>
-#include "../../lib/Cluster.h"
+#include "../../lib/Cluster.hpp"
 class KMeans : public Cluster {
     private:
         int k, total_iterations = 0, max_iter;

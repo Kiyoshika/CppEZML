@@ -1,9 +1,9 @@
-#ifndef KERNELDENSITY_H
-#define KERNELDENSITY_H
+#ifndef KERNELDENSITY_HPP
+#define KERNELDENSITY_HPP
 
 #include <math.h>
 #include <vector>
-#include "../Stats.h"
+#include "../Stats.hpp"
 
 class KernelDensity {
     private:

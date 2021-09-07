@@ -1,10 +1,10 @@
-#ifndef GAUSSIANNAIVEBAYES_H
-#define GAUSSIANNAIVEBAYES_H
+#ifndef GAUSSIANNAIVEBAYES_HPP
+#define GAUSSIANNAIVEBAYES_HPP
 #include <unordered_map>
 #include <set>
 #include <vector>
-#include "../../lib/Classifier.h"
-#include "../../stats/Stats.h"
+#include "../../lib/Classifier.hpp"
+#include "../../stats/Stats.hpp"
 
 class GaussianNaiveBayes : public Classifier
 {

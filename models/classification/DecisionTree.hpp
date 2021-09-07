@@ -1,12 +1,12 @@
-#ifndef DECISIONTREE_H
-#define DECISIONTREE_H
+#ifndef DECISIONTREE_HPP
+#define DECISIONTREE_HPP
 #include <iostream>
 #include <vector>
 #include <algorithm>
 #include <math.h>
 #include <stdexcept>
 
-#include "../../lib/Classifier.h"
+#include "../../lib/Classifier.hpp"
 
 class Node
 {

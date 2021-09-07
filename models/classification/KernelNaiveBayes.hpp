@@ -1,10 +1,10 @@
-#ifndef KERNELNAIVEBAYES_H
-#define KERNELNAIVEBAYES_H
+#ifndef KERNELNAIVEBAYES_HPP
+#define KERNELNAIVEBAYES_HPP
 #include <unordered_map>
 #include <set>
 #include <vector>
-#include "../../lib/Classifier.h"
-#include "../../stats/Density/KernelDensity.h"
+#include "../../lib/Classifier.hpp"
+#include "../../stats/Density/KernelDensity.hpp"
 class KernelNaiveBayes : public Classifier
 {
     private:

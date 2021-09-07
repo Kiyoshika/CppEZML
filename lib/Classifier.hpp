@@ -1,5 +1,5 @@
-#ifndef CLASSIFIER_H
-#define CLASSIFIER_H
+#ifndef CLASSIFIER_HPP
+#define CLASSIFIER_HPP
 #include <vector>
 #include <iostream>
 // Base class for all classifiers. Contains metrics and such that's common among all models

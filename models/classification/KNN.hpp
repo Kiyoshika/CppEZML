@@ -1,5 +1,5 @@
-#ifndef KNN_H
-#define KNN_H
+#ifndef KNN_HPP
+#define KNN_HPP
 
 #include <iostream>
 #include <vector>
@@ -9,8 +9,8 @@
 #include <map>
 #include <algorithm>
 
-#include "../../lib/Classifier.h"
-#include "../../data/DataSet.h"
+#include "../../lib/Classifier.hpp"
+#include "../../data/DataSet.hpp"
 
 class KNN : public Classifier
 {
