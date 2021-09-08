@@ -2,28 +2,29 @@
 #define REGRESSOR_HPP
 #include <vector>
 #include <math.h>
+#include "../data/DataSet.hpp"
 // Base class for all regressors. Contains metrics and such that's common among all models
 class Regressor
 {
 public:
     // all classes must implement a predict() and fit() method
     virtual void fit(
-        std::vector<std::vector<double>> const &, // data
-        std::vector<double> const &               // target
+        DataSet<double> &, // data
+        DataSet<double> &  // target
         ) = 0;
 
-    virtual std::vector<double> predict(std::vector<std::vector<double>> const &) = 0;
+    virtual DataSet<double> predict(DataSet<double> &) = 0;
 
     // root mean squared error
-    double get_rmse(std::vector<double> const &actual_y, std::vector<double> const &predicted_y)
+    double get_rmse(DataSet<double> &actual_y, DataSet<double> &predicted_y)
     {
         double sum = 0;
-        for (int i = 0; i < actual_y.size(); ++i)
+        for (int i = 0; i < actual_y.count_rows(); ++i)
         {
-            sum += (actual_y[i] - predicted_y[i]) * (actual_y[i] - predicted_y[i]);
+            sum += (actual_y(i, 0) - predicted_y(i, 0)) * (actual_y(i, 0) - predicted_y(i, 0));
         }
 
-        return sqrt(sum / actual_y.size());
+        return sqrt(sum / actual_y.count_rows());
     }
 };
 #endif

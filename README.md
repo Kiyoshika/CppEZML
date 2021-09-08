@@ -14,7 +14,7 @@ This library may become more stable around v0.8.0 or afterwards...
 * Statistical functions: mean(), max(), min(), etc.
 
 # Latest Update (Dev Work)
-## v0.6.0 -- 06 September 2021
+## v0.6.0 -- 07 September 2021
 v0.5.0.1 is remaining unreleased due to the plan to overhaul DataSet.h, so it's being merged into v0.6.0 before release.
 
 #### What's being worked on in v0.6.0?
@@ -37,6 +37,7 @@ Finished (v0.6.0):
 * Overhauled DataSet.h (and added drop())
 * Converted all headers from .h to .hpp
 * Added many more code examples for reference
+* Reworked LinearRegression.hpp
 
 In Progress (v0.6.0):
 * Rework remaining headers to be compatable with new DataSet.hpp overhaul
