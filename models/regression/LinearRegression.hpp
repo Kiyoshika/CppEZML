@@ -13,9 +13,8 @@ class LinearRegression : public Regressor
 {
 private:
 	// hyperparameters
-	bool verbose = false;
-	int max_iter = 1000;
-	double learning_rate = 0.001;
+	size_t max_iter;
+	double learning_rate;
 	double (*user_loss_func)(double, double) = nullptr;
 
 	bool is_fitted = false;
@@ -58,7 +57,7 @@ private:
 
 		double result = 0;
 
-		for (int i = 0; i < weights.size() - 1; ++i)
+		for (size_t i = 0; i < weights.size() - 1; ++i)
 		{
 			result += weights[i] * input_x_row[i];
 		}
@@ -70,13 +69,12 @@ private:
 
 public:
 	/*
-	* verbose - prints loss occasionally
 	* max_iter - maximum iterations to run gradient descent algorithm
 	* learning_rate - softening parameter to reduce jumping around the loss function
 	* loss_func - optional loss function that can be passed by reference from user if they want to specify their own loss function
 	*/
-	LinearRegression(int max_iter = 100000, double learning_rate = 0.001, double (*loss_func)(double, double) = nullptr)
-	: verbose{verbose}, max_iter{max_iter}, learning_rate{learning_rate} 
+	LinearRegression(size_t max_iter = 100000, double learning_rate = 0.001, double (*loss_func)(double, double) = nullptr)
+	: max_iter{max_iter}, learning_rate{learning_rate} 
 	{
 		if (loss_func != NULL) { user_loss_func = loss_func; }
 	}
@@ -86,7 +84,7 @@ public:
 		this->independent_variable_names = train_x.column_names;
 
 		// create initial weights equal to size of input columns (# of indep vars)
-		for (int col = 0; col < train_x.count_columns(); ++col)
+		for (size_t col = 0; col < train_x.count_columns(); ++col)
 		{
 			weights.push_back(0);
 		}
@@ -96,13 +94,9 @@ public:
 		// vector to adjust the weights from loss derivative
 		std::vector<double> weight_adjustments(weights.size());
 
-		int iter = 0;
-		double prediction, loss_value, loss_derivative;
-		int print_loss_iter = max_iter / 10; // print loss 10 times total during fit
+		size_t iter = 0;
+		double prediction, loss_derivative;
 
-		// if loss hasn't (significantly) changed within 10 iterations, stop the algorithm
-        double previous_loss;
-        int no_change_counter = 0;
 		while (iter < max_iter)
 		{
 			loss_derivative = 0;
@@ -151,7 +145,7 @@ public:
 		// allocate size
 		predictions.resize(input_x.count_rows());
 
-		for (int current_row = 0; current_row < input_x.count_rows(); ++current_row)
+		for (size_t current_row = 0; current_row < input_x.count_rows(); ++current_row)
 		{
 			// predict() in this case is the private function...no recursion here
 			predictions[current_row] = predict(weights, input_x.get_row(current_row));
