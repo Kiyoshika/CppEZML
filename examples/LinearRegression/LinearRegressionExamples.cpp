@@ -2,8 +2,6 @@
 #include "data/DataSet.hpp"
 #include "models/regression/LinearRegression.hpp"
 
-using namespace std;
-
 // absolute loss
 // note that the order of the parameters DO matter (actual MUST be first)
 double custom_loss(double actual_y, double predicted_y)
