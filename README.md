@@ -38,9 +38,9 @@ Finished (v0.6.0):
 * Converted all headers from .h to .hpp
 * Added many more code examples for reference
 * Reworked all models to be compatable with DataSet overhaul
+* Fixed memory leak in DecisionTree.hpp (and now using smart pointers)
 
 Upcoming:
-* Fix the memory leak in DecisionTree.hpp
 * Kernel regression
 * K-Fold Cross Validation
 * And more...
