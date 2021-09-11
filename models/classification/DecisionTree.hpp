@@ -13,58 +13,54 @@ class Node
 public:
 	Node *left = NULL;
 	Node *right = NULL;
-	std::vector<std::vector<double>> data;
-	std::vector<int> labels;
+
+	DataSet<double> data;
+	std::vector<size_t> labels;
 	int feature_index;
 	double split_point;
 
 	// majority vote prediction
 	int predict_label()
 	{
-		std::vector<int>::iterator result;
+		std::vector<size_t>::iterator result;
 		result = std::max_element(labels.begin(), labels.end());
 		int result_index = std::distance(labels.begin(), result);
 
 		return labels[result_index];
 	}
 
-	std::vector<int> get_unique_labels()
+	std::vector<size_t> get_unique_labels(std::vector<size_t> &labels_vec)
 	{
-		std::vector<int> labels_copy = labels;
+		std::vector<size_t> labels_copy = labels_vec;
 		std::sort(labels_copy.begin(), labels_copy.end());
         labels_copy.erase(std::unique(labels_copy.begin(), labels_copy.end()), labels_copy.end());
 
 		return labels_copy;
 	}
-
-	void print_labels()
-	{
-		for (int i = 0; i < labels.size(); ++i)
-		{
-			std::cout << labels[i] << " ";
-		}
-	}
 };
+
 
 class DecisionTree : public Classifier
 {
 private:
 	// hyperparameters
-	int max_depth = 1000;
-	int min_samples_split = 2;
-	std::vector<int> *categorical_columns = nullptr;
+	size_t max_depth = 1000;
+	size_t min_samples_split = 2;
+	std::vector<size_t> *categorical_columns = nullptr;
+
+	Node root_node; // a copy of the root node so we can deallocate the pointer later on
 
 	// utility functions
-	std::vector<int> get_unique_labels(std::vector<int> labels)
+	std::vector<size_t> get_unique_labels(std::vector<size_t> labels)
 	{
-		std::vector<int>::iterator ip;
+		std::vector<size_t>::iterator ip;
 		ip = std::unique(labels.begin(), labels.end());
 		labels.resize(std::distance(labels.begin(), ip));
 
 		return labels;
 	}
 
-	double get_class_proportion(int target_class, std::vector<int> const &class_labels)
+	double get_class_proportion(size_t target_class, std::vector<size_t> const &class_labels)
 	{
 		double sum = 0;
 		for (int i = 0; i < class_labels.size(); ++i)
@@ -78,13 +74,13 @@ private:
 		return sum / class_labels.size();
 	}
 
-	double entropy(std::vector<int> class_labels)
+	double entropy(std::vector<size_t> class_labels)
 	{
 		// keep original class labels
-		std::vector<int> original_class_labels = class_labels;
+		std::vector<size_t> original_class_labels = class_labels;
 
 		// get unique class labels
-		std::vector<int>::iterator ip;
+		std::vector<size_t>::iterator ip;
 		std::sort(class_labels.begin(), class_labels.end());
 		ip = std::unique(class_labels.begin(), class_labels.end());
 		class_labels.resize(std::distance(class_labels.begin(), ip));
@@ -92,7 +88,7 @@ private:
 		// iterate over unique classes, calculate proportion and finally entropy
 		double entropy_sum = 0;
 		double proportion;
-		for (int i = 0; i < class_labels.size(); ++i)
+		for (size_t i = 0; i < class_labels.size(); ++i)
 		{
 			proportion = get_class_proportion(class_labels[i], original_class_labels);
 			entropy_sum -= proportion * log2(proportion);
@@ -101,16 +97,10 @@ private:
 		return entropy_sum;
 	}
 
-	double column_median(int column_index, std::vector<std::vector<double>> const &data)
+	double column_median(size_t column_index, DataSet<double> &data)
 	{
 		// tranpose column into row
-		std::vector<double> row_data;
-		row_data.resize(data.size());
-
-		for (int i = 0; i < data.size(); ++i)
-		{
-			row_data[i] = data[i][column_index];
-		}
+		std::vector<double> row_data = data.get_column(column_index);
 
 		// sort and compute median
 		double median;
@@ -128,10 +118,15 @@ private:
 		return median;
 	}
 
-	std::vector<double> split_feature(int feature_index, std::vector<std::vector<double>> const &data, std::vector<int> const &labels, char feature_type)
+	std::vector<double> split_feature(
+		size_t feature_index, 
+		DataSet<double> &data, 
+		std::vector<size_t> labels, 
+		char feature_type
+	)
 	{
-		std::vector<int> left_labels;
-		std::vector<int> right_labels;
+		std::vector<size_t> left_labels;
+		std::vector<size_t> right_labels;
 		double split_point;
 		double split_entropy;
 		// feature_type = n is numeric
@@ -140,9 +135,9 @@ private:
 		{
 			// numeric features will split on median
 			split_point = column_median(feature_index, data);
-			for (int i = 0; i < data.size(); ++i)
+			for (size_t i = 0; i < data.count_rows(); ++i)
 			{
-				if (data[i][feature_index] <= split_point)
+				if (data(i, feature_index) <= split_point)
 				{
 					left_labels.push_back(labels[i]);
 				}
@@ -152,30 +147,30 @@ private:
 				}
 			}
 
-			split_entropy = ((double)left_labels.size() / (double)data.size()) * entropy(left_labels) + ((double)right_labels.size() / (double)data.size()) * entropy(right_labels);
+			split_entropy = ((double)left_labels.size() / (double)data.count_rows()) * entropy(left_labels) + ((double)right_labels.size() / (double)data.count_rows()) * entropy(right_labels);
 		}
 		else if (feature_type == 'c')
 		{
-			std::vector<int> temp_left_labels; // going to be resuing these until we find best category label to split on
-			std::vector<int> temp_right_labels;
+			std::vector<size_t> temp_left_labels; // going to be resuing these until we find best category label to split on
+			std::vector<size_t> temp_right_labels;
 
 			// iterate over every unique label and select one that returns minimum entropy (to maximize information gain)
 			// first, transpose column vector into integer row vector and call get_unique_labels
-			std::vector<int> unique_category_labels;
-			for (int i = 0; i < data.size(); ++i)
+			std::vector<size_t> unique_category_labels;
+			for (size_t i = 0; i < data.count_rows(); ++i)
 			{
-				unique_category_labels.push_back((int)data[i][feature_index]);
+				unique_category_labels.push_back((size_t)data(i, feature_index));
 			}
 
 			unique_category_labels = get_unique_labels(unique_category_labels);
 			std::vector<double> category_entropy_list;
 			double temp_entropy;
 
-			for (int i = 0; i < unique_category_labels.size(); ++i)
+			for (size_t i = 0; i < unique_category_labels.size(); ++i)
 			{
-				for (int r = 0; r < data.size(); ++r)
+				for (size_t r = 0; r < data.count_rows(); ++r)
 				{
-					if ((int)data[r][feature_index] == unique_category_labels[i])
+					if ((size_t)data(r, feature_index) == unique_category_labels[i])
 					{
 						temp_left_labels.push_back(labels[r]);
 					}
@@ -185,7 +180,7 @@ private:
 					}
 				}
 
-				temp_entropy = ((double)left_labels.size() / (double)data.size()) * entropy(left_labels) + ((double)right_labels.size() / (double)data.size()) * entropy(right_labels);
+				temp_entropy = ((double)left_labels.size() / (double)data.count_rows()) * entropy(left_labels) + ((double)right_labels.size() / (double)data.count_rows()) * entropy(right_labels);
 				category_entropy_list.push_back(temp_entropy);
 				// empty vectors to reuse on next iteration
 				temp_left_labels.clear();
@@ -195,7 +190,7 @@ private:
 			// find which category contained best (minimum) entropy
 			int best_index = -1;
 			double current_entropy = -1;
-			for (int i = 0; i < category_entropy_list.size(); ++i)
+			for (size_t i = 0; i < category_entropy_list.size(); ++i)
 			{
 				if (category_entropy_list[i] > current_entropy)
 				{
@@ -219,12 +214,12 @@ private:
 
 	void grow_tree(
 		Node *tree_node,
-		std::vector<std::vector<double>> const &data,
-		std::vector<int> const &labels,
-		int max_depth,
-		int current_depth,
-		int min_samples_split,
-		std::vector<int> *categorical_columns)
+		DataSet<double> &data,
+		std::vector<size_t> labels,
+		size_t max_depth,
+		size_t current_depth,
+		size_t min_samples_split,
+		std::vector<size_t> *categorical_columns)
 	{
 
 		if (current_depth > max_depth)
@@ -234,14 +229,14 @@ private:
 
 		double root_entropy = entropy(labels);
 
-		int feature_to_split = -1;
+		size_t feature_to_split = 0;
 		double max_info_gain = -1.0;
 		// iterate over every feature and grow the tree
 		double info_gain;
 		double split_point;
 		std::vector<double> feature_split;
 
-		for (int i = 0; i < data[0].size(); ++i)
+		for (size_t i = 0; i < data.count_columns(); ++i)
 		{
 
 			if (categorical_columns == NULL || categorical_columns != NULL && std::find(categorical_columns->begin(), categorical_columns->end(), i) == categorical_columns->end())
@@ -272,23 +267,55 @@ private:
 			current_depth = max_depth + 1;
 		}
 
-		std::vector<std::vector<double>> left_data;
-		std::vector<int> left_labels;
+		DataSet<double> left_data;
+		std::vector<size_t> left_labels;
 
-		std::vector<std::vector<double>> right_data;
-		std::vector<int> right_labels;
+		DataSet<double> right_data;
+		std::vector<size_t> right_labels;
 
-		for (int i = 0; i < data.size(); ++i)
+		size_t left_data_size = 0, right_data_size = 0;
+
+		// pass through to resize data sets appropriately
+		for (size_t i = 0; i < data.count_rows(); ++i)
 		{
-			if (data[i][feature_to_split] <= split_point)
+			if (data(i, feature_to_split) <= split_point)
 			{
-				left_data.push_back(data[i]);
-				left_labels.push_back(labels[i]);
+				left_data_size++;
 			}
 			else
 			{
-				right_data.push_back(data[i]);
-				right_labels.push_back(labels[i]);
+				right_data_size++;
+			}
+		}
+
+		left_data.resize(left_data_size, data.count_columns());
+		right_data.resize(right_data_size, data.count_columns());
+
+		std::vector<size_t> labels_vec = labels;
+
+		// a map used to track the current indices when setting data
+		// for left/right nodes
+
+		// key = type (left, right), value = current index
+		std::unordered_map<size_t, size_t> left_right_indices = {
+			{0, 0}, // left = 0 by default
+			{1, 0} // right = 0 by default
+		};
+
+		// add data on second pass through
+		for (size_t i = 0; i < data.count_rows(); ++i)
+		{
+			if (data(i, feature_to_split) <= split_point)
+			{
+				left_data.set_row(left_right_indices[0], data.get_row(i));
+				left_labels.push_back(labels_vec[i]);
+				left_right_indices[0]++;
+			}
+			else
+			{
+				right_data.set_row(left_right_indices[1], data.get_row(i));
+				right_labels.push_back(labels_vec[i]);
+				left_right_indices[1]++;
 			}
 		}
 
@@ -303,20 +330,20 @@ private:
 		tree_node->right->data = right_data;
 		tree_node->right->labels = right_labels;
 
-		std::vector<int> left_unique = get_unique_labels(left_labels);
-		std::vector<int> right_unique = get_unique_labels(right_labels);
+		std::vector<size_t> left_unique = get_unique_labels(left_labels);
+		std::vector<size_t> right_unique = get_unique_labels(right_labels);
 
 		if (current_depth < max_depth)
 		{
 			// grow tree in both directions
 			// must have at least two samples to split (could be controlled by parameter)
 			// must have more than one unique label (otherwise it's a perfect leaf node)
-			if (tree_node->left->data.size() > (min_samples_split - 1) && left_unique.size() > 1)
+			if (tree_node->left->data.count_rows() > (min_samples_split - 1) && left_unique.size() > 1)
 			{
 				grow_tree(tree_node->left, left_data, left_labels, max_depth, current_depth + 1, min_samples_split, categorical_columns);
 			}
 
-			if (tree_node->right->data.size() > (min_samples_split - 1) && right_unique.size() > 1)
+			if (tree_node->right->data.count_rows() > (min_samples_split - 1) && right_unique.size() > 1)
 			{
 				grow_tree(tree_node->right, right_data, right_labels, max_depth, current_depth + 1, min_samples_split, categorical_columns);
 			}
@@ -324,11 +351,11 @@ private:
 	}
 
 	// traversing tree when calling predict()
-	int predict_down(Node *tree_node, std::vector<double> const &data)
+	size_t predict_down(Node *tree_node, std::vector<double> data)
 	{
 
 		if (tree_node->left == NULL || tree_node->right == NULL)
-		{ // leaf
+		{
 			return tree_node->predict_label();
 		}
 		else if (data[tree_node->feature_index] <= tree_node->split_point)
@@ -340,14 +367,31 @@ private:
 			return predict_down(tree_node->right, data);
 		}
 
-		return -1;
+		// technically unreachable but required
+		return 0;
+	}
+
+	void dealloc_tree(Node *current_node)
+	{
+		if (current_node != NULL)
+		{
+			dealloc_tree(current_node->left);
+			dealloc_tree(current_node->right);
+			delete current_node;
+		}
 	}
 
 public:
-	DecisionTree(int max_depth = 1000, int min_samples_split = 2, std::vector<int> *categorical_columns = nullptr) 
+	DecisionTree(size_t max_depth = 1000, size_t min_samples_split = 2, std::vector<size_t> *categorical_columns = nullptr) 
 	: max_depth{max_depth}, min_samples_split{min_samples_split}, categorical_columns{categorical_columns} {}
 
-	Node *root;
+	Node *root = new Node();
+
+	// free the memory after it's used to make predictions
+	~DecisionTree()
+	{
+		dealloc_tree(root);
+	}
 
 	int get_tree_depth(Node *root)
 	{
@@ -371,56 +415,36 @@ public:
 	}
 
 	void fit(
-		std::vector<std::vector<double>> const &data, 
-		std::vector<int> const &labels
+		DataSet<double> &data, 
+		DataSet<size_t> &labels
 		) override
 	{
-
 		if (min_samples_split < 2)
 		{
 			throw std::invalid_argument("Please set min_samples_split parameter to at least 2.");
 		}
-		root = new Node();
-		grow_tree(root, data, labels, max_depth, 1, min_samples_split, categorical_columns);
+
+		grow_tree(root, data, labels.get_column(0), max_depth, 1, min_samples_split, categorical_columns);
 	}
 
-	std::vector<int> predict(std::vector<std::vector<double>> const &data) override
+	DataSet<size_t> predict(DataSet<double> &data) override
 	{
-		std::vector<int> predictions;
+
+		std::vector<size_t> predictions;
 
 		// start at root node and traverse
-		for (int i = 0; i < data.size(); ++i)
+		for (size_t i = 0; i < data.count_rows(); ++i)
 		{
-			predictions.push_back(predict_down(root, data[i]));
+			predictions.push_back(predict_down(root, data.get_row(i)));
 		}
 
-		return predictions;
+		DataSet<size_t> predictions_data(predictions.size(), 1);
+		predictions_data.set_column(0, predictions);
+		std::vector<std::string> col_name = {"predicted_y"};
+		predictions_data.set_column_names(col_name);
+
+		return predictions_data;
 	}
-
-	// generic methods that apply to all classifiers
-    void print_predictions(std::vector<std::vector<double>> const &data, char style = 'h')
-    {
-        // h = horizontal
-        // v = vertical
-        std::vector<int> predictions = predict(data);
-
-        for (int i = 0; i < predictions.size(); ++i)
-        {
-            if (style == 'h')
-            {
-                std::cout << predictions[i] << " ";
-            }
-            else if (style == 'v')
-            {
-                std::cout << predictions[i] << std::endl;
-            }
-            else
-            {
-                std::invalid_argument("'style' argument in print_predictions() only accepts 'h' or 'v' as valid inputs.");
-            }
-        }
-        std::cout << std::endl;
-    }
 };
 
 #endif
