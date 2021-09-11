@@ -5,14 +5,15 @@
 #include <algorithm>
 #include <math.h>
 #include <stdexcept>
+#include <memory>
 
 #include "../../lib/Classifier.hpp"
 
 class Node
 {
 public:
-	Node *left = NULL;
-	Node *right = NULL;
+	std::shared_ptr<Node> left;
+	std::shared_ptr<Node> right;
 
 	DataSet<double> data;
 	std::vector<size_t> labels;
@@ -213,7 +214,7 @@ private:
 	}
 
 	void grow_tree(
-		Node *tree_node,
+		std::shared_ptr<Node> tree_node,
 		DataSet<double> &data,
 		std::vector<size_t> labels,
 		size_t max_depth,
@@ -322,11 +323,11 @@ private:
 		tree_node->split_point = split_point;
 		tree_node->feature_index = feature_to_split;
 
-		tree_node->left = new Node();
+		tree_node->left = std::make_unique<Node>();
 		tree_node->left->data = left_data;
 		tree_node->left->labels = left_labels;
 
-		tree_node->right = new Node();
+		tree_node->right = std::make_unique<Node>();
 		tree_node->right->data = right_data;
 		tree_node->right->labels = right_labels;
 
@@ -351,10 +352,9 @@ private:
 	}
 
 	// traversing tree when calling predict()
-	size_t predict_down(Node *tree_node, std::vector<double> data)
+	size_t predict_down(std::shared_ptr<Node> tree_node, std::vector<double> data)
 	{
-
-		if (tree_node->left == NULL || tree_node->right == NULL)
+		if (tree_node->left == NULL && tree_node->right == NULL)
 		{
 			return tree_node->predict_label();
 		}
@@ -371,7 +371,7 @@ private:
 		return 0;
 	}
 
-	void dealloc_tree(Node *current_node)
+	/*void dealloc_tree(Node *current_node)
 	{
 		if (current_node != NULL)
 		{
@@ -379,21 +379,21 @@ private:
 			dealloc_tree(current_node->right);
 			delete current_node;
 		}
-	}
+	}*/
 
 public:
 	DecisionTree(size_t max_depth = 1000, size_t min_samples_split = 2, std::vector<size_t> *categorical_columns = nullptr) 
 	: max_depth{max_depth}, min_samples_split{min_samples_split}, categorical_columns{categorical_columns} {}
 
-	Node *root = new Node();
+	std::shared_ptr<Node> root = std::make_unique<Node>();
 
 	// free the memory after it's used to make predictions
 	~DecisionTree()
 	{
-		dealloc_tree(root);
+		//dealloc_tree(root);
 	}
 
-	int get_tree_depth(Node *root)
+	/*int get_tree_depth(Node *root)
 	{
 		if (root == NULL)
 		{
@@ -412,7 +412,7 @@ public:
 				return right_height + 1;
 			}
 		}
-	}
+	}*/
 
 	void fit(
 		DataSet<double> &data, 
