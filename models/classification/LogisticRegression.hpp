@@ -7,27 +7,30 @@
 #include <math.h>
 
 #include "../../lib/Classifier.hpp"
+#include "../../data/DataSet.hpp"
 
 class LogisticRegression : public Classifier
 {
 private:
 	// hyperparameters
-	bool verbose = false;
-	int max_iter = 1000;
-	double learning_rate = 0.001;
+	size_t max_iter;
+	double learning_rate;
 	double (*user_loss_func)(double, double) = nullptr;
 
 	bool is_fitted = false;
 	std::vector<double> weights;
 
+	std::vector<std::string> independent_variable_names;
+
 	// default loss
 	double loss(double actual_y, double predicted_y)
 	{
-		// cross entropy
-		return -actual_y*log2(predicted_y) - (1 - actual_y)*log2(1 - predicted_y);
+		// categorical cross entropy
+		// using 0.01 to "soften" the inside of the logarithm to avoid zeroes
+		return -actual_y*log2(predicted_y + 0.01) - (1 - actual_y)*log2(1 - predicted_y + 0.01);
 	}
 
-	double loss_deriv(double actual_y, std::vector<double> const &train_x_row, int train_y_row)
+	double loss_deriv(double actual_y, double predicted_y)
 	{
 		// using limit derivatives from calculus one
 		double loss_derivative;
@@ -35,10 +38,10 @@ private:
 		{
 			if (user_loss_func != NULL)
 			{
-				loss_derivative = loss_derivative = (user_loss_func(train_y_row, evaluate(this->weights, train_x_row, 0.0001)) - user_loss_func(train_y_row, evaluate(this->weights, train_x_row))) / 0.0001;
+				loss_derivative = (user_loss_func(actual_y, predicted_y + 0.0001) - user_loss_func(actual_y, predicted_y)) / 0.0001;
 			} else 
 			{
-				loss_derivative = loss_derivative = (loss(train_y_row, evaluate(this->weights, train_x_row, 0.0001)) - loss(train_y_row, evaluate(this->weights, train_x_row))) / 0.0001;
+				loss_derivative = (loss(actual_y, predicted_y + 0.0001) - loss(actual_y, predicted_y)) / 0.0001;
 			}
 		}
 		catch (int e)
@@ -49,184 +52,136 @@ private:
 		return loss_derivative;
 	}
 
-	// evaluate models output
-	double evaluate(std::vector<double> const &weights, std::vector<double> const &input_x_row, double adjust = 0.0)
+	double sigmoid(double x)
+	{
+		return 1 / (1 + exp(-x));
+	}
+
+	// local predict, not to be confused with the public predict()
+	double predict(std::vector<double> &weights, std::vector<double> input_x_row)
 	{
 
 		double result = 0;
 
-		for (int i = 0; i < weights.size() - 1; ++i)
+		for (size_t i = 0; i < weights.size() - 1; ++i)
 		{
 			result += weights[i] * input_x_row[i];
 		}
 
 		// bias term
 		result += weights[weights.size() - 1];
-		return sigmoid(result + adjust);
+		// using sigmoid as link function
+		return sigmoid(result);
 	}
-
-    double sigmoid(double x) {
-        double e = 2.71828;
-        return 1 / (1 + pow(e, -x));
-    }
 
 public:
 	/*
-	* verbose - prints loss occasionally
 	* max_iter - maximum iterations to run gradient descent algorithm
 	* learning_rate - softening parameter to reduce jumping around the loss function
 	* loss_func - optional loss function that can be passed by reference from user if they want to specify their own loss function
 	*/
-	LogisticRegression(bool verbose = false, int max_iter = 1000, double learning_rate = 0.001, double (*loss_func)(double, double) = nullptr)
-	: verbose{verbose}, max_iter{max_iter}, learning_rate{learning_rate} 
+	LogisticRegression(size_t max_iter = 100000, double learning_rate = 0.001, double (*loss_func)(double, double) = nullptr)
+	: max_iter{max_iter}, learning_rate{learning_rate} 
 	{
 		if (loss_func != NULL) { user_loss_func = loss_func; }
 	}
 
-	void fit(std::vector<std::vector<double>> const &train_x, std::vector<int> const &train_y) override
+	void fit(DataSet<double> &train_x, DataSet<size_t> &train_y) override
 	{
+		this->independent_variable_names = train_x.column_names;
+
 		// create initial weights equal to size of input columns (# of indep vars)
-		for (int col = 0; col < train_x[0].size(); ++col)
+		for (size_t col = 0; col < train_x.count_columns(); ++col)
 		{
 			weights.push_back(0);
 		}
 
-		weights.push_back(0); // add bias term at the end
+		weights.push_back(0); // add bias term
 
-		int iter = 0;
-		double prediction, loss_value, loss_derivative;
-		int print_loss_iter = max_iter / 10; // print loss 10 times total during fit
+		// vector to adjust the weights from loss derivative
+		std::vector<double> weight_adjustments(weights.size());
 
-        // if loss hasn't (significantly) changed within 10 iterations, stop the algorithm
-        double previous_loss;
-        int no_change_counter = 0;
+		size_t iter = 0;
+		double prediction, loss_derivative;
+
 		while (iter < max_iter)
 		{
-			loss_value = 0;
+			loss_derivative = 0;
 
-			for (int current_row = 0; current_row < train_x.size(); ++current_row)
+			// reset weight_adjustments to zero
+			std::fill(weight_adjustments.begin(), weight_adjustments.end(), 0.0);
+
+			for (size_t w = 0; w < weight_adjustments.size(); ++w)
 			{
-				prediction = evaluate(weights, train_x[current_row]);
-				if (user_loss_func != NULL) 
+				for (size_t r = 0; r < train_x.count_rows(); ++r)
 				{
-					loss_value += user_loss_func(train_y[current_row], prediction);
-				} else 
-				{
-					loss_value += loss(train_y[current_row], prediction);
-				}
-
-                previous_loss = loss_value;
-				loss_derivative = loss_deriv(train_y[current_row], train_x[current_row], train_y[current_row]);
-
-                weights[weights.size() - 1] -= learning_rate * loss_derivative; // bias term
-				for (int i = 0; i < weights.size() - 1; ++i)
-				{
-					weights[i] -= learning_rate * loss_derivative * train_x[current_row][i];
+					// bias / intercept
+					if (w == weight_adjustments.size() - 1)
+					{
+						weight_adjustments[w] += (loss_deriv(train_y(r, 0), predict(weights, train_x.get_row(r))) * learning_rate) / train_x.count_rows();
+					}
+					else
+					{
+						weight_adjustments[w] += (loss_deriv(train_y(r, 0), predict(weights, train_x.get_row(r))) * learning_rate * train_x(r, w)) / train_x.count_rows();
+					}
 				}
 			}
 
-			if (verbose)
+			// adjust weights
+			for (size_t w = 0; w < weights.size(); ++w)
 			{
-				if (iter % print_loss_iter == 0)
-				{
-					std::cout << "Total loss at iteration #" << iter << ": " << loss_value << std::endl;
-				}	
+				weights[w] -= weight_adjustments[w];
 			}
-
-            // early stopping
-            if (iter > 0) {
-
-                if (loss_value - previous_loss <= 0.001) {
-                    no_change_counter += 1;
-                } else {
-                    no_change_counter = 0;
-                }
-
-                previous_loss = loss_value;
-            }
-
-            if (no_change_counter == 100) {
-                break;
-            }
 
 			iter += 1;
 		}
 
-
 		is_fitted = true;
 	}
 
-	std::vector<int> predict(std::vector<std::vector<double>> const &input_x) override
+	DataSet<size_t> predict(DataSet<double> &input_x) override
 	{
+		DataSet<size_t> prediction_data;
+
 		if (!is_fitted)
 		{
 			throw std::logic_error("Please fit() your model before calling predict()!");
 		}
 
-		std::vector<int> predictions;
+		std::vector<size_t> predictions;
 		// allocate size
-		predictions.resize(input_x.size());
-        double pred;
-		for (int current_row = 0; current_row < input_x.size(); ++current_row)
+		predictions.resize(input_x.count_rows());
+
+		for (size_t current_row = 0; current_row < input_x.count_rows(); ++current_row)
 		{
-            pred = evaluate(weights, input_x[current_row]);
-            if (pred > 0.5) { predictions[current_row] = 1; }
-            else { predictions[current_row] = 0; }
+			// predict() in this case is the private function...no recursion here
+			predictions[current_row] = predict(weights, input_x.get_row(current_row));
 		}
 
-		return predictions;
+		prediction_data.resize(predictions.size(), 1);
+		prediction_data.set_column(0, predictions);
+		std::vector<std::string> col_name = {"predicted_y"};
+		prediction_data.set_column_names(col_name);
+
+		return prediction_data;
 	}
 
-	std::vector<double> get_weights()
+	DataSet<double> get_weights()
 	{
-		return weights;
-	}
-
-	void print_weights(char style = 'h')
-	{
-		// h = horizontally
-		// v = vertically
-		std::cout << "Weights:" << std::endl;
-		for (int i = 0; i < weights.size(); ++i)
+		DataSet<double> weights_data;
+		weights_data.resize(1, weights.size());
+		weights_data.set_row(0, weights);
+		std::vector<std::string> col_names;
+		for (size_t i = 0; i < weights.size(); ++i)
 		{
-			if (style == 'h')
-			{
-				std::cout << weights[i] << " ";
-			}
-			else if (style == 'v')
-			{
-				std::cout << weights[i] << std::endl;
-			}
+			if (i == weights.size() - 1) { col_names.push_back("Intercept"); }
 			else
 			{
-				throw std::invalid_argument("'style' argument in print_weights() only accespts 'h' or 'v' as valid inputs.");
+				col_names.push_back(this->independent_variable_names[i]);
 			}
 		}
-		std::cout << std::endl;
-	}
-
-	void print_predictions(std::vector<std::vector<double>> const &input_x, char style = 'h')
-	{
-		// h = horizontally
-		// v = vertically
-		std::vector<int> predictions = predict(input_x);
-		std::cout << "Predictions: " << std::endl;
-		for (int i = 0; i < predictions.size(); ++i)
-		{
-			if (style == 'h')
-			{
-				std::cout << predictions[i] << " ";
-			}
-			else if (style == 'v')
-			{
-				std::cout << predictions[i] << std::endl;
-			}
-			else
-			{
-				throw std::invalid_argument("'style' argument in print_predictions() only accepts 'h' or 'v' as valid inputs.");
-			}
-		}
-		std::cout << std::endl;
+		weights_data.set_column_names(col_names);
+		return weights_data;
 	}
 };
 #endif

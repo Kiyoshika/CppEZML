@@ -6,8 +6,12 @@ class Cluster {
 
     public:
         // no labels for clustering algorithms; returns vector with clustered classes
-        virtual std::vector<int> fit(
-            std::vector<std::vector<double>> const& // data
+        virtual void fit(
+            DataSet<double> & // data
         ) = 0;
+
+        virtual DataSet<size_t> predict(
+            DataSet<double> & // data
+            ) = 0;
 };
 #endif
