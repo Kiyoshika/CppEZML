@@ -6,7 +6,7 @@ NOTICE: This library is still heavily in development and NOT recommended for pro
 This library may become more stable around v0.8.0 or afterwards...
 
 # Latest Release
-## v0.4.0 -- 16 September 2021
+## v0.6.0 -- 16 September 2021
 #### What's new in v0.6.0 (& v0.5.0.1)?
 v0.5.0.1
 * Implemented KMeans clustering
