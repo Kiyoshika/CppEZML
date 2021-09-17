@@ -33,7 +33,7 @@ v0.6.0
 
 # Latest Update (Dev Work)
 ## v0.6.0 -- 16 September 2021
-v0.5.0.1 is remaining unreleased due to the plan to overhaul DataSet.h, so it's being merged into v0.6.0 before release.
+See dev notes above.
 
 ### What's being worked on in v0.6.0?
 Nothing committed since release as of now.
