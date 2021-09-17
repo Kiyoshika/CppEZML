@@ -1,7 +1,10 @@
 test.cpp
 test
 test.csv
-README.md
+test.exe
+main_test.exe
+main_test.cpp
+test_target.csv
 .vscode
 xtrain.csv
 xtest.csv
@@ -9,3 +12,7 @@ ytrain.csv
 ytest.csv
 .ipynb_checkpoints/
 generate_data.ipynb
+stress_test100k.csv
+DataSetNew.cpp
+dsn.exe
+tests.py
