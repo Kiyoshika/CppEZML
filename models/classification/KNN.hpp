@@ -214,5 +214,10 @@ public:
 
         return prediction_data;
     }
+
+    std::vector<double> k_fold_cv(DataSet<double> xdata, DataSet<size_t> ydata, size_t k = 10, double test_ratio = 0.3)
+	{
+		return Classifier::k_fold_cv<KNN>(xdata, ydata, k, test_ratio);
+	}
 };
 #endif

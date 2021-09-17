@@ -176,5 +176,10 @@ public:
 		weights_data.set_column_names(col_names);
 		return weights_data;
 	}
+
+	std::vector<double> k_fold_cv(DataSet<double> xdata, DataSet<double> ydata, size_t k = 10, double test_ratio = 0.3)
+	{
+		return Regressor::k_fold_cv<LinearRegression>(xdata, ydata, k, test_ratio);
+	}
 };
 #endif
