@@ -28,10 +28,26 @@ int main()
   return 0;
 }
 ```
+## Constructor Definition
+This is a snippet from v0.6.0 of DataSet.hpp
+```c++
+DataSet() {}
 
+// load data set when passing filename
+DataSet(std::string filepath, std::string sep = ",", bool has_headers = true)
+{
+    this->load(filepath, sep, has_headers);
+}
+
+DataSet(size_t x, size_t y) {
+    data.resize(x*y);
+    rows = x;
+    columns = y;
+}
+```
 ## Index
 1. Loading Data
-    1. [load()]() - load from csv file
+    1. [load()](loading-from-csv-file) - load from csv file
     2. [load()]() - load from std::vector
 2. Data Attributes
     1. [count_rows()]() - count total rows
@@ -62,3 +78,48 @@ int main()
     2. [countna_vector()]() - count null columns and return a vector where each index represents a column
     3. [dropna()]() - drop rows from dataset containing null values
     4. [replacena()]() - replace null values with another value
+
+## Loading From CSV File
+#### Definition and Parameters
+```c++
+void load(std::string filepath, std::string sep = ",", bool has_headers = true)
+```
+* `std::string filepath`{:.c++} - A string indicating the path to the CSV file you want to load.
+* `std::string sep = ","`{:.c++} - A string indicating the separator in the CSV file. (Default is ",")
+* `bool has_headers = true`{:.c++} - A boolean indicating if the file has headers (column names). (Default is true)
+#### Examples
+```c++
+#include "CppEZML/data/DataSet.hpp"
+
+int main()
+{
+    // you can load data from constructor
+    DataSet<std::string> mydata_constr("example_data.csv");
+    // you can also pass custom delimiter and whether or not to read first row as headers (default = true)
+    DataSet<std::string> mydata_constr2("example_data.csv", "|", false);
+
+    // you can also explicitly load data using load() method (with same arguments as above)
+
+    // load data as string
+    DataSet<std::string> mydata_string;
+    mydata_string.load("example_data.csv");
+    mydata_string.head();
+
+    // load data as doubles
+    DataSet<double> mydata_double;
+    mydata_double.load("example_data.csv");
+    mydata_double.head();
+
+    // load data as integers
+    DataSet<int> mydata_int;
+    mydata_int.load("example_data.csv");
+    mydata_int.head();
+
+    // load data with custom separator (|) and without headers
+    DataSet<std::string> mydata_other;
+    // parameters: filename, sep = ",", headers = true
+    mydata_other.load("example_data.csv", "|", false);
+
+    return 0;
+}
+```
