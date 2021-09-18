@@ -47,7 +47,7 @@ DataSet(size_t x, size_t y) {
 ```
 ## Index
 1. Loading Data
-    1. [load()](loading-from-csv-file) - load from csv file
+    1. [load()](#loading-from-csv-file) - load from csv file
     2. [load()]() - load from std::vector
 2. Data Attributes
     1. [count_rows()]() - count total rows
@@ -82,11 +82,12 @@ DataSet(size_t x, size_t y) {
 ## Loading From CSV File
 #### Definition and Parameters
 ```c++
-void load(std::string filepath, std::string sep = ",", bool has_headers = true)
+void load(
+  std::string filepath, // A string indicating the path to the CSV file you want to load.
+  std::string sep = ",", // A string indicating the separator in the CSV file.
+  bool has_headers = true //  A boolean indicating if the file has headers (column names.)
+)
 ```
-* `std::string filepath`{:.c++} - A string indicating the path to the CSV file you want to load.
-* `std::string sep = ","`{:.c++} - A string indicating the separator in the CSV file. (Default is ",")
-* `bool has_headers = true`{:.c++} - A boolean indicating if the file has headers (column names). (Default is true)
 #### Examples
 ```c++
 #include "CppEZML/data/DataSet.hpp"
