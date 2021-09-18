@@ -518,13 +518,13 @@ class DataSet {
         }
 
         // print first N rows of a data set (default = 10)
-        void head(int rows = 10)
+        void head(size_t rows = 10)
         {
             std::string cutoff_str;
             // if column vector exists, print columns before data
             if (column_names.size() > 0)
             {
-                for (int c = 0; c < column_names.size(); ++c)
+                for (size_t c = 0; c < column_names.size(); ++c)
                 {
 
                     //std::cout << columns[c] << "\t\t";
@@ -554,7 +554,7 @@ class DataSet {
             if constexpr (std::is_integral_v<T> || std::is_floating_point_v<T>)
             {
                 // print #[rows] of data
-                for (int r = 0; r < rows; ++r)
+                for (size_t r = 0; r < rows; ++r)
                 {
                     if (r >= this->count_rows())
                     {
@@ -562,7 +562,7 @@ class DataSet {
                     } // check if rows is larger than our data set
                     else
                     {
-                        for (int c = 0; c < this->count_columns(); ++c)
+                        for (size_t c = 0; c < this->count_columns(); ++c)
                         {
                             
                             if (std::to_string((*this)(r, c)).length() < 15)
@@ -589,7 +589,7 @@ class DataSet {
             else
             // assuming a string if not double/integer
             {
-                for (int r = 0; r < rows; ++r)
+                for (size_t r = 0; r < rows; ++r)
                 {
                     if (r >= this->count_rows())
                     {
@@ -597,7 +597,7 @@ class DataSet {
                     } // check if rows is larger than our data set
                     else
                     {
-                        for (int c = 0; c < this->count_columns(); ++c)
+                        for (size_t c = 0; c < this->count_columns(); ++c)
                         {
                             
                             if ((*this)(r, c).length() < 15)
@@ -912,7 +912,7 @@ class DataSet {
         }
 
         // sample a data set with or without replacement
-        DataSet<T> sample(int n = 1, bool replace = false)
+        DataSet<T> sample(size_t n = 1, bool replace = false)
         {
             // set random seed
             srand(time(NULL));
@@ -1126,7 +1126,7 @@ class DataSet {
                 double _sum, _mean, _stdev, _min, _10p, _25p, _median, _75p, _90p, _max;
                 std::string cutoff_str;
                 std::cout << "             |  ";
-                for (int c = 0; c < this->column_names.size(); ++c)
+                for (size_t c = 0; c < this->column_names.size(); ++c)
                 {
 
                     if (this->column_names[c].length() < 15)
@@ -1152,7 +1152,7 @@ class DataSet {
                 Stats stats;
                 std::cout << "\nSum:" << std::setfill(' ') << std::setw(10) << "|"
                         << "\t";
-                for (int c = 0; c < this->column_names.size(); ++c)
+                for (size_t c = 0; c < this->column_names.size(); ++c)
                 {
                     _sum = stats.sum(this->get_column(c));
                     print_describe_line(_sum);
@@ -1160,7 +1160,7 @@ class DataSet {
 
                 std::cout << "\nMin:" << std::setfill(' ') << std::setw(10) << "|"
                         << "\t";
-                for (int c = 0; c < this->column_names.size(); ++c)
+                for (size_t c = 0; c < this->column_names.size(); ++c)
                 {
                     _min = stats.min(this->get_column(c));
                     print_describe_line(_min);
@@ -1168,7 +1168,7 @@ class DataSet {
 
                 std::cout << "\nMax:" << std::setfill(' ') << std::setw(10) << "|"
                         << "\t";
-                for (int c = 0; c < this->column_names.size(); ++c)
+                for (size_t c = 0; c < this->column_names.size(); ++c)
                 {
                     _max = stats.max(this->get_column(c));
                     print_describe_line(_max);
@@ -1176,7 +1176,7 @@ class DataSet {
 
                 std::cout << "\nMean:" << std::setfill(' ') << std::setw(9) << "|"
                         << "\t";
-                for (int c = 0; c < this->column_names.size(); ++c)
+                for (size_t c = 0; c < this->column_names.size(); ++c)
                 {
                     _mean = stats.mean(this->get_column(c));
                     print_describe_line(_mean);
@@ -1184,7 +1184,7 @@ class DataSet {
 
                 std::cout << "\nStDev:" << std::setfill(' ') << std::setw(8) << "|"
                         << "\t";
-                for (int c = 0; c < this->column_names.size(); ++c)
+                for (size_t c = 0; c < this->column_names.size(); ++c)
                 {
                     _stdev = stats.stdev(this->get_column(c));
                     print_describe_line(_stdev);
@@ -1192,7 +1192,7 @@ class DataSet {
 
                 std::cout << "\n10th %:" << std::setfill(' ') << std::setw(7) << "|"
                         << "\t";
-                for (int c = 0; c < this->column_names.size(); ++c)
+                for (size_t c = 0; c < this->column_names.size(); ++c)
                 {
                     _10p = stats.percentile(this->get_column(c), 0.1);
                     print_describe_line(_10p);
@@ -1200,7 +1200,7 @@ class DataSet {
 
                 std::cout << "\n25th %:" << std::setfill(' ') << std::setw(7) << "|"
                         << "\t";
-                for (int c = 0; c < this->column_names.size(); ++c)
+                for (size_t c = 0; c < this->column_names.size(); ++c)
                 {
                     _25p = stats.percentile(this->get_column(c), 0.25);
                     print_describe_line(_25p);
@@ -1208,7 +1208,7 @@ class DataSet {
 
                 std::cout << "\nMedian:" << std::setfill(' ') << std::setw(7) << "|"
                         << "\t";
-                for (int c = 0; c < this->column_names.size(); ++c)
+                for (size_t c = 0; c < this->column_names.size(); ++c)
                 {
                     _median = stats.median(this->get_column(c));
                     print_describe_line(_median);
@@ -1216,7 +1216,7 @@ class DataSet {
 
                 std::cout << "\n75th %:" << std::setfill(' ') << std::setw(7) << "|"
                         << "\t";
-                for (int c = 0; c < this->column_names.size(); ++c)
+                for (size_t c = 0; c < this->column_names.size(); ++c)
                 {
                     _75p = stats.percentile(this->get_column(c), 0.75);
                     print_describe_line(_75p);
@@ -1224,7 +1224,7 @@ class DataSet {
 
                 std::cout << "\n90th %:" << std::setfill(' ') << std::setw(7) << "|"
                         << "\t";
-                for (int c = 0; c < this->column_names.size(); ++c)
+                for (size_t c = 0; c < this->column_names.size(); ++c)
                 {
                     _90p = stats.percentile(this->get_column(c), 0.90);
                     print_describe_line(_90p);
@@ -1501,11 +1501,11 @@ class DataSet {
 
         // replace arbitrary value in data set
         // unlike replacena(), this supports numeric data types as well
-        DataSet<T> replace(T original_value, T replace_value, bool inplace = false, int occurences = -1)
+        DataSet<T> replace(T original_value, T replace_value, bool inplace = false, size_t occurences = 0)
         {
             DataSet<T> modified_data(this->count_rows(), this->count_columns());
             modified_data.set_column_names(this->column_names);
-            int occurence_counter = 0;
+            size_t occurence_counter = 0;
 
             if (inplace)
             {
@@ -1513,7 +1513,7 @@ class DataSet {
                 {
                     for (size_t col = 0; col < this->count_columns(); ++col)
                     {
-                        if ((*this)(row, col) == original_value && occurences == -1) // no limit on occurences
+                        if ((*this)(row, col) == original_value && occurences == 0) // no limit on occurences
                         {
                             this->set(row, col, replace_value);
                             occurence_counter += 1;
@@ -1534,7 +1534,7 @@ class DataSet {
                 {
                     for (size_t col = 0; col < this->count_columns(); ++col)
                     {
-                        if (occurences == -1) // no limit on occurences
+                        if (occurences == 0) // no limit on occurences
                         {
                             if ((*this)(row, col) == original_value)
                             {
