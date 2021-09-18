@@ -501,23 +501,18 @@ class DataSet {
         // load from another data set (with columns)
         void load(std::vector<T> const& data, std::vector<std::string> const& columns)
         {
-            this->data = data;
-            this->columns_names = columns;
-            this->rows = this->count_rows();
-            this->columns = this->count_columns();
+            this->resize(1, columns.size());
+            this->column_names = columns;
+            this->set_row(0, data);
         }
 
         // load from 1D vector (will be translated into column vector)
         void load(std::vector<T> const& data, std::string column_name)
         {
             std::vector<std::string> temp_column = { column_name };
-            
-            // set dimensions
-            this->columns = 1;
-            this->rows = data.size();
 
             // set 1D vector as column vector
-            this->data.resize(data.size());
+            this->resize(data.size(), 1);
             this->set_column(0, data);
             this->column_names = temp_column;
         }
