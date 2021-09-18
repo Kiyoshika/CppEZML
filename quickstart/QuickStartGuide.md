@@ -11,7 +11,9 @@ There are two main ways to download CppEZML.
 
 First way is to go to the [releases](https://github.com/Kiyoshika/CppEZML/releases) section on the repository and download the zip file containing all the headers.
 
-Second way is to git clone the repository. Choose a directory you desire, and use `git clone https://github.com/Kiyoshika/CppEZML.git`
+Second way is to git clone the repository. Choose a directory you desire, and use
+
+`git clone https://github.com/Kiyoshika/CppEZML.git`
 
 ## Accessing CppEZML Headers
 As of right now (v0.6.0), CppEZML is a header-only library. Meaning that the release only contains headers and no compiled pieces.
