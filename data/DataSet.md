@@ -112,6 +112,7 @@ DataSet<std::string> mydata_other;
 // parameters: filename, sep = ",", headers = true
 mydata_other.load("example_data.csv", "|", false);
 ```
+<br/><br/>
 ## Loading From Vector
 #### Definition and Parameters
 
@@ -148,6 +149,7 @@ mydata.head();
 mydata.load(vector_data, "single_column");
 mydata.head();
 ```
+<br/><br/>
 ## Count Rows
 #### Definition and Parameters
 ```c++
@@ -158,6 +160,7 @@ size_t count_rows()
 DataSet<double> sample_data("example_file.csv");
 std::cout << sample_data.count_rows() << "\n";
 ```
+<br/><br/>
 ## Count Columns
 #### Definition and Parameters
 ```c++
@@ -168,6 +171,7 @@ size_t count_columns()
 DataSet<double> sample_data("example_file.csv");
 std::cout << sample_data.count_columns() << "\n";
 ```
+<br/><br/>
 ## Printing First N Rows
 #### Definition and Parameters
 ```c++
@@ -180,6 +184,7 @@ void head(
 DataSet<double> sample_data("example_file.csv");
 sample_data.head();
 ```
+<br/><br/>
 ## Resizing Data
 #### Definition and Parameters
 ```c++
@@ -196,6 +201,7 @@ DataSet<double> sample_data;
 // by default, the cells will be 0.0
 sample_data.resize(2, 3);
 ```
+<br/><br/>
 ## Accessing Cell
 #### Definition and Parameters
 ```c++
@@ -210,6 +216,7 @@ DataSet<double> mydata(2, 2);
 // accesses the cell at 0th row and 1st column
 std::cout << mydata(0, 1) << "\n";
 ```
+<br/><br/>
 ## Setting Cell
 #### Definition and Parameters
 ```c++
@@ -224,6 +231,7 @@ void set(
 DataSet<double> mydata(2, 2);
 mydata.set(0, 1, 5.5);
 ```
+<br/><br/>
 ## Get Row
 #### Definition and Parameters
 ```c++
@@ -236,6 +244,7 @@ std::vector<T> get_row(
 DataSet<double> mydata(2, 3);
 std::vector<double> extract = mydata.get_row(0); // {0.0, 0.0, 0.0}
 ```
+<br/><br/>
 ## Get Column
 #### Definition and Parameters
 ```c++
@@ -248,6 +257,7 @@ std::vector<T> get_column(
 DataSet<double> mydata(2, 3);
 std::vector<double> extract = mydata.get_column(2); // {0.0, 0.0}
 ```
+<br/><br/>
 ## Set Row
 #### Definition and Parameters
 ```c++
@@ -262,6 +272,7 @@ DataSet<double> mydata(2, 3);
 std::vector<double> new_data = { 1.2, 4.5, 2.2 };
 mydata.set_row(0, new_data);
 ```
+<br/><br/>
 ## Set Column
 #### Definition and Parameters
 ```c++
@@ -276,6 +287,7 @@ DataSet<double> mydata(2, 3);
 std::vector<double> new_data = { 2.5, 1.8 };
 mydata.set_column(2, new_data);
 ```
+<br/><br/>
 ## Set Column Names
 #### Definition and Parameters
 ```c++
@@ -291,6 +303,7 @@ DataSet<double> mydata(2, 2);
 std::vector<std::string> col_names = { "col1", "col2" };
 mydata.set_column_names(col_names);
 ```
+<br/><br/>
 ## Rename Columns
 #### Definition and Parameters
 ```c++
@@ -311,6 +324,7 @@ std::unordered_map<std::string, std::string> remap_cols = {
 };
 mydata.rename(remap_cols);
 ```
+<br/><br/>
 ## Transpose Data
 #### Definition and Parameters
 NOTE: When transposing data, the column names will be reset to default names \
@@ -354,3 +368,4 @@ col0            col1
 2.000000        5.000000
 3.000000        6.000000
 ```
+<br/><br/>
