@@ -32,11 +32,15 @@ v0.6.0
 * K-Fold Cross Validation
 
 # Latest Update (Dev Work)
-## v0.6.0 -- 16 September 2021
-See dev notes above.
+## v0.6.0 -- 18 September 2021
+Hotfixes for v0.6.0
+* Linear model run times were long due to being 100,000 iterations each. Reduced iterations and upped learning rate.
+* k_fold_cv renamed to bootstrap_cv since the implementation was not actually the K Fold method.
+* k_fold_cv (now bootstrap_cv) was broken on certain models due to no default constructor. Now passing pointers of objects through function.
 
-### What's being worked on in v0.6.0?
-Nothing committed since release as of now.
+### What's being worked on now?
+* Currently writing documentation following v0.6.0 release.
+* Performing hotfixes to bugs I missed from v0.6.0 release.
 
 Upcoming:
 * Sorting and Joining on DataSet.hpp
