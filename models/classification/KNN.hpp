@@ -35,8 +35,8 @@ private:
     }
 
     double get_distance(
-        std::vector<double> x1, 
-        std::vector<double> x2, 
+        std::vector<double> &x1, 
+        std::vector<double> &x2, 
         double (*custom_distance)(std::vector<double>, std::vector<double>) = NULL
     )
     {
@@ -172,6 +172,11 @@ public:
         size_t common_class, highest_count;
         size_t current_count = 0;
 
+        double distance;
+
+        std::vector<double> current_point_row;
+        std::vector<double> class_data_row;
+
         for (size_t current_point = 0; current_point < data.count_rows(); ++current_point)
         {
             // reset
@@ -182,12 +187,15 @@ public:
             {
                 for (size_t r = 0; r < class_data[class_label].count_rows(); ++r)
                 {
+                    current_point_row = data.get_row(current_point);
+                    class_data_row = class_data[class_label].get_row(r);
+                    distance = get_distance(current_point_row, class_data_row, this->custom_distance);
                     // ignore equivalent point(s)
                     // this is a lazy (and bad) way of excluding the current data point
-                    if (get_distance(data.get_row(current_point), class_data[class_label].get_row(r), this->custom_distance) == 0) { continue; }
+                    if (distance == 0) { continue; }
                     else 
                     {
-                        distance_vector.push_back(get_distance(data.get_row(current_point), class_data[class_label].get_row(r), this->custom_distance));
+                        distance_vector.push_back(distance);
                         class_vector.push_back(class_label); 
                     }
                 }

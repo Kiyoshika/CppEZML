@@ -1429,7 +1429,7 @@ class DataSet {
             {
                 for (size_t col = 0; col < this->count_columns(); ++col)
                 {
-                    if ((*this)(row, col)  == "") { na_counter += 1; }
+                    if ((*this)(row, col)  == "") { na_counter += 1; break; }
                 }
             }
 
