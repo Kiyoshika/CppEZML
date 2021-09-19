@@ -30,7 +30,7 @@ public:
     }
 
     template <typename Model>
-    std::vector<double> k_fold_cv(DataSet<double> xdata, DataSet<double> ydata, size_t k, double test_ratio = 0.3)
+    std::vector<double> bootstrap_cv(Model *model_pointer, DataSet<double> xdata, DataSet<double> ydata, size_t k, double test_ratio = 0.3)
     {
         if (k < 2) { throw std::invalid_argument("k must be at least two for k_fold_cv."); }
         
@@ -40,18 +40,20 @@ public:
         std::vector<double> rmse_values(k);
         std::vector<double> return_values(2); // 0 = mean of rmse values, 1 = stdev of rmse values
 
+        std::vector<size_t> last_column;
         for (size_t fold = 0; fold < k; ++fold)
         {
             full_data.split_data(test_ratio, train_data, test_data);
 
-            std::vector<size_t> last_column = {full_data.count_columns() - 1};
+            last_column = {full_data.count_columns() - 1};
             train_x = train_data.drop<double>(last_column);
             train_y = train_data.select<double>(last_column);
 
             test_x = test_data.drop<double>(last_column);
             test_y = test_data.select<double>(last_column);
 
-            Model model;
+            // passing a pointer to capture constructor paramters from model
+            Model model = *model_pointer;
             model.fit(train_x, train_y);
             
             rmse_values[fold] = model.get_rmse(test_y, model.predict(test_x));
