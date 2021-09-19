@@ -47,7 +47,7 @@ public:
     }
 
     template <typename Model>
-    std::vector<double> bootstrap_cv(Model *model_pointer, DataSet<double> xdata, DataSet<size_t> ydata, size_t k, double test_ratio = 0.3)
+    std::vector<double> monte_carlo_cv(Model *model_pointer, DataSet<double> xdata, DataSet<size_t> ydata, size_t k, double test_ratio = 0.3)
     {
         if (k < 2) { throw std::invalid_argument("k must be at least two for k_fold_cv."); }
         

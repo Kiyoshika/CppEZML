@@ -17,7 +17,7 @@ int main()
 
     // default number of splits is 30 but higher values are recommended for 
     // more consistent statistics. Here I am using 1000 random splits at 70% train 30% test (default)
-    std::vector<double> bcv = lr.bootstrap_cv(xdata, ydata, 1000);
+    std::vector<double> bcv = lr.monte_carlo_cv(xdata, ydata, 1000);
 
     std::cout << "Mean: " << bcv[0] << "\n";
     std::cout << "StDev: " << bcv[1] << "\n";

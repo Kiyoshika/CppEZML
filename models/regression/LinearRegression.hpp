@@ -177,9 +177,9 @@ public:
 		return weights_data;
 	}
 
-	std::vector<double> bootstrap_cv(DataSet<double> xdata, DataSet<double> ydata, size_t k = 30, double test_ratio = 0.3)
+	std::vector<double> monte_carlo_cv(DataSet<double> xdata, DataSet<double> ydata, size_t k = 30, double test_ratio = 0.3)
 	{
-		return Regressor::bootstrap_cv<LinearRegression>(this, xdata, ydata, k, test_ratio);
+		return Regressor::monte_carlo_cv<LinearRegression>(this, xdata, ydata, k, test_ratio);
 	}
 };
 #endif
