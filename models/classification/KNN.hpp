@@ -217,9 +217,9 @@ public:
         return prediction_data;
     }
 
-    std::vector<double> bootstrap_cv(DataSet<double> xdata, DataSet<size_t> ydata, size_t k = 30, double test_ratio = 0.3)
+    std::vector<double> monte_carlo_cv(DataSet<double> xdata, DataSet<size_t> ydata, size_t k = 30, double test_ratio = 0.3)
 	{
-		return Classifier::bootstrap_cv<KNN>(this, xdata, ydata, k, test_ratio);
+		return Classifier::monte_carlo_cv<KNN>(this, xdata, ydata, k, test_ratio);
 	}
 };
 #endif
