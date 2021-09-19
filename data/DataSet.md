@@ -60,19 +60,19 @@ Note: All examples are written in the scope of main() to shorten the code
     9. [rename()](#rename-columns) - rename a set of columns using a map
 6. Operations
     1. [transpose()](#transpose-data) - transpose a dataset
-    2. [append()]() - merge two datasets row-wise or column-wise
-    3. [select()]() - subset a dataset to certain columns
-    4. [drop()]() - inverse of select(); subset a dataset by dropping certain columns
-    5. [filter()]() - filter a dataset by a user-defined function
-    6. [replace()]() - replace occurences of a value with another
-    7. [cast()]() - cast contents of dataset from one datatype to another
-    8. [sample()]() - randomly sample from dataset with or without replacement
-    9. [split_data()]() - split data into two portions, typically for creating train/test splits
+    2. [append()](#append-data) - merge two datasets row-wise or column-wise
+    3. [select()](#select-columns) - subset a dataset to certain columns
+    4. [drop()](#drop-columns) - inverse of select(); subset a dataset by dropping certain columns
+    5. [filter()](#filter-data) - filter a dataset by a user-defined function
+    6. [replace()](#replace-data) - replace occurences of a value with another
+    7. [cast()](#cast-data) - cast contents of dataset from one datatype to another
+    8. [sample()](#sample-data) - randomly sample from dataset with or without replacement
+    9. [split_data()](#split-data) - split data into two portions, typically for creating train/test splits
 7. Missing Values
-    1. [countna()]() - count null columns and print to console
-    2. [countna_vector()]() - count null columns and return a vector where each index represents a column
-    3. [dropna()]() - drop rows from dataset containing null values
-    4. [replacena()]() - replace null values with another value
+    1. [countna()](#count-null-values) - count null columns and print to console
+    2. [countna_vector()](#vector-of-null-counts) - count null columns and return a vector where each index represents a column
+    3. [dropna()](#drop-null-values) - drop rows from dataset containing null values
+    4. [replacena()](#replace-null-values) - replace null values with another value
 
 ## Loading From CSV File
 #### Definition and Parameters
@@ -369,3 +369,483 @@ col0            col1
 3.000000        6.000000
 ```
 <br/><br/>
+## Append Data
+#### Definitions and Parameters
+```c++
+DataSet<T> append(
+  DataSet<T> other_data, // the data set you want to append
+  char type = 'r'        // the axis to append on. 'r' = rows, 'c' = columns
+)
+```
+There is currently a bug where if you append on columns without having any column names, \
+nothing will happen.
+#### Examples
+```c++
+DataSet<double> dataset_one(2, 2);
+DataSet<double> dataset_two(2, 2);
+
+std::vector<std::string> col1 = { "col1", "col2" };
+std::vector<std::string> col2 = { "col3", "col4" };
+
+dataset_one.set_column_names(col1);
+dataset_two.set_column_names(col2);
+
+// append row-wise
+dataset_one.append(dataset_two).head(); // new size: (4, 2)
+
+std::cout << "\n";
+
+// append column-wise
+// NOTE: this method will NOT work if your column names are empty
+dataset_one.append(dataset_two, 'c').head(); // new size: (2, 4)
+```
+Output:
+```
+col1            col2
+----------------------------- 
+0.000000        0.000000
+0.000000        0.000000
+0.000000        0.000000
+0.000000        0.000000
+
+col1            col2            col3            col4
+-----------------------------------------------------------
+0.000000        0.000000        0.000000        0.000000
+0.000000        0.000000        0.000000        0.000000  
+```
+<br/><br/>
+## Select Columns
+#### Definition and Parameters
+**Override 1**:
+You can select columns by index.
+```c++
+DataSet<X> select(
+  std::vector<size_t> const& indices // indices of columns to select
+)
+```
+**Override 2**:
+You can also select columns by name.
+```c++
+DataSet<X> select(
+  std::vector<std::string> const& indices // names of columns to select
+)
+```
+You can also cast data while simultaneously selecting columns (see example 2.)
+#### Examples
+Example 1: Selecting columns by index and name.
+```c++
+DataSet<double> mydata(2, 2);
+
+std::vector<std::string> names = { "col1", "col2" };
+mydata.set_column_names(names);
+
+// select by index
+std::vector<size_t> byidx = { 0 };
+mydata.select<double>(byidx).head();
+
+std::cout << "\n";
+
+// select by name
+std::vector<std::string> byname = { "col2" };
+mydata.select<double>(byname).head();
+```
+Output:
+```
+col1
+--------------
+0.000000
+0.000000
+
+col2
+--------------
+0.000000
+0.000000
+```
+Example 2: Selecting column and casting to std::string into another dataset.
+```c++
+DataSet<double> mydata(2, 2);
+
+std::vector<std::string> names = { "col1", "col2" };
+mydata.set_column_names(names);
+
+// select by index
+std::vector<size_t> byidx = { 0 };
+DataSet<std::string> string_data1 = mydata.select<std::string>(byidx);
+
+// select by name
+std::vector<std::string> byname = { "col2" };
+DataSet<std::string> string_data2 = mydata.select<std::string>(byname);
+```
+<br/><br/>
+## Drop Columns
+#### Definition and Parameters
+**Override 1**:
+```c++
+DataSet<X> drop(                     // <X> is the new data type to cast to (if new = old, no conversion is made)
+  std::vector<size_t> const& indices // indices of columns to drop
+)
+```
+**Override 2**:
+```c++
+DataSet<X> drop(                          // <X> is the new data type to cast to (if new = old, no conversion is made)
+  std::vector<std::string> const& indices // names of columns to drop
+)
+```
+#### Examples
+Example 1: Dropping columns by index and name.
+```c++
+DataSet<double> mydata(2, 2);
+
+std::vector<std::string> names = { "col1", "col2" };
+mydata.set_column_names(names);
+
+// drop by index
+std::vector<size_t> byidx = { 0 };
+mydata.drop<double>(byidx).head();
+
+std::cout << "\n";
+
+// drop by name
+std::vector<std::string> byname = { "col2" };
+mydata.drop<double>(byname).head();
+```
+Output:
+```
+col2
+--------------
+0.000000
+0.000000
+
+col1
+--------------
+0.000000
+0.000000
+```
+Example 2: Just like select(), you can cast the data after dropping columns.
+```c++
+DataSet<double> mydata(2, 2);
+
+std::vector<std::string> names = { "col1", "col2" };
+mydata.set_column_names(names);
+
+// select by index
+std::vector<size_t> byidx = { 0 };
+DataSet<std::string> string_data1 = mydata.drop<std::string>(byidx);
+
+// select by name
+std::vector<std::string> byname = { "col2" };
+DataSet<std::string> string_data2 = mydata.drop<std::string>(byname);
+```
+<br/><br/>
+## Filter Data
+#### Definition and Parameters
+```c++
+DataSet<T> filter(
+  bool (*filter_conditions)(std::vector<T>) // function pointer or lambda
+)
+```
+#### Examples
+Example 1: Using function pointers. This is useful if you use the filter multiple times.
+```c++
+// NOTE: vector type must be same as DataSet<> type
+// in this case, double
+bool my_filter(std::vector<double> indices)
+{
+    // the indices refer to the column index
+    return (indices[0] < indices[2]) || (indices[1] > 4);
+}
+
+// somewhere in main()...
+DataSet<double> mydata("datasets/small_regression_test.csv");
+mydata.filter(&my_filter).head();
+```
+Output:
+```
+col1            col2            col3            col4            col5            target        
+-----------------------------------------------------------------------------------------
+2.400000        5.200000        1.000000        4.800000        0.740000        6.700000
+2.500000        5.100000        0.580000        4.900000        5.600000        2.500000      
+2.500000        4.100000        1.800000        3.100000        5.700000        5.800000
+5.700000        4.200000        1.700000        6.800000        0.610000        2.900000
+3.000000        4.100000        2.700000        3.300000        -0.180000       4.900000
+5.200000        5.200000        2.900000        3.600000        -1.700000       6.800000
+6.100000        4.800000        4.200000        2.600000        5.800000        10.400000     
+2.400000        5.200000        1.000000        4.800000        0.740000        6.700000
+2.500000        5.100000        0.580000        4.900000        5.600000        2.500000
+2.500000        4.100000        1.800000        3.100000        5.700000        5.800000
+```
+Example 2: Using lambdas. This is useful for adhoc filters that you need once.
+```c++
+DataSet<double> mydata("datasets/small_regression_test.csv");
+
+mydata.filter([](std::vector<double> indices){
+    return (indices[0] < indices[2]) || (indices[1] > 4);
+}).head();
+```
+Output:
+```
+col1            col2            col3            col4            col5            target        
+-----------------------------------------------------------------------------------------
+2.400000        5.200000        1.000000        4.800000        0.740000        6.700000
+2.500000        5.100000        0.580000        4.900000        5.600000        2.500000      
+2.500000        4.100000        1.800000        3.100000        5.700000        5.800000
+5.700000        4.200000        1.700000        6.800000        0.610000        2.900000
+3.000000        4.100000        2.700000        3.300000        -0.180000       4.900000
+5.200000        5.200000        2.900000        3.600000        -1.700000       6.800000
+6.100000        4.800000        4.200000        2.600000        5.800000        10.400000     
+2.400000        5.200000        1.000000        4.800000        0.740000        6.700000
+2.500000        5.100000        0.580000        4.900000        5.600000        2.500000
+2.500000        4.100000        1.800000        3.100000        5.700000        5.800000
+```
+Note that as of now, you can NOT capture any variables in the lambda as I'm using \
+a function pointer. However, this is planned to change so you can filter against \
+local variables, aggregations, etc.
+<br/><br/>
+## Replace Data
+#### Definition and Parameters
+```c++
+DataSet<T> replace(
+  T original_value,     // original value in dataset to replace
+  T replace_value,      // value to replace with
+  bool inplace = false, // whether or not to modify the dataset inplace (overwrite)
+  size_t occurences = 0 // replace up to first N occurences. If 0, will replace ALL occurences
+)
+```
+#### Examples
+```c++
+DataSet<double> mydata(2, 2);
+mydata.set(0, 1, 5.5);
+mydata.set(1, 0, 5.5);
+mydata.head();
+
+std::cout << "\n";
+
+// replace only first occurence and modify data inplace
+mydata.replace(5.5, 10.5, true, 1);
+mydata.head();
+```
+Output:
+```
+0.000000        5.500000      
+5.500000        0.000000
+
+
+0.000000        10.500000
+5.500000        0.000000
+```
+<br/><br/>
+## Cast Data
+#### Definition and Parameters
+```c++
+DataSet<X> cast() // <X> is the new type to cast to
+```
+#### Examples
+```c++
+DataSet<double> mydata(2, 2);
+mydata.set(0, 1, 5.5);
+mydata.set(1, 0, 5.5);
+mydata.head();
+
+std::cout << "\n";
+
+// cast doubles to size_t
+DataSet<size_t> size_t_data = mydata.cast<size_t>();
+size_t_data.head();
+
+std::cout << "\n";
+
+// cast size_t to std::string
+DataSet<std::string> string_data = size_t_data.cast<std::string>();
+string_data.head();
+```
+Output:
+```
+0.000000        5.500000
+5.500000        0.000000
+
+
+0               5
+5               0
+
+
+0               5
+5               0
+```
+<br/><br/>
+## Sample Data
+#### Definition and Parameters
+```c++
+DataSet<T> sample(
+  size_t n = 1,        // number of records to sample
+  bool replace = false // whether or not to sample with replacement
+)
+```
+#### Examples
+```c++
+DataSet<double> mydata("datasets/small_regression_test.csv");
+DataSet<double> without_replacement = mydata.sample(5);
+DataSet<double> with_replacement = mydata.sample(100, true);
+```
+<br/><br/>
+## Split Data
+#### Definition and Parameters
+```c++
+void split_data(
+  double test_ratio, // percentage to allocate to test data; value in interval (0, 1)
+  DataSet<T> &train, // training data passed by reference
+  DataSet<T> &test   // test data passed by reference
+)
+```
+#### Examples
+```c++
+DataSet<double> mydata("datasets/small_regression_test.csv");
+DataSet<double> train_data, test_data;
+mydata.split_data(0.3, train_data, test_data);
+
+std::cout << "Full Data Rows: " << mydata.count_rows() << "\n";
+std::cout << "Train Data Rows: " << train_data.count_rows() << "\n";
+std::cout << "Test Data Rows: " << test_data.count_rows() << "\n";
+```
+Output:
+```
+Full Data Rows: 100
+Train Data Rows: 71
+Test Data Rows: 29
+```
+Seems there's some rounding error, but nevertheless, test size is ~30%.
+<br/><br/>
+## Count Null Values
+#### Definition and Parameters
+```c++
+void countna() // NOTE: only works with std::string data
+```
+#### Examples
+```c++
+DataSet<std::string> mydata(2, 2);
+
+std::vector<std::string> cols = { "col1", "col2" };
+mydata.set_column_names(cols);
+
+mydata.set(0, 1, "X");
+mydata.set(1, 0, "X");
+
+mydata.head();
+
+std::cout << "\n";
+
+// only works if you have column names defined
+mydata.countna();
+```
+Output:
+```
+col1            col2
+-----------------------------
+                X
+X
+
+column name : null count
+--------------------------
+col1 : 1
+col2 : 1
+```
+<br/><br/>
+## Vector of Null Counts
+#### Definition and Parameters
+```c++
+std::vector<size_t> countna_vector() // NOTE: only works with std::string data
+```
+#### Examples
+```c++
+DataSet<std::string> mydata(2, 2);
+
+std::vector<std::string> cols = { "col1", "col2" };
+mydata.set_column_names(cols);
+
+mydata.set(0, 1, "X");
+mydata.set(1, 0, "X");
+
+std::vector<size_t> null_column_counts = mydata.countna_vector(); // { 1, 1 }
+```
+<br/><br/>
+## Drop Null Values
+#### Definition and Parameters
+Will drop any rows that contain a null (empty) value. \
+Known Issues:
+* inplace = true currently doesn't function as expected
+* an error is thrown if the entire row is null
+```c++
+DataSet<T> dropna(     // NOTE: only works on std::string data
+  bool inplace = false // whether or not to modify the dataset inplace
+)
+```
+#### Examples
+```c++
+DataSet<std::string> mydata(2, 2);
+
+std::vector<std::string> cols = { "col1", "col2" };
+mydata.set_column_names(cols);
+
+mydata.set(0, 1, "X");
+mydata.set(1, 0, "X");
+mydata.set(1, 1, "X");
+
+mydata.head();
+
+// mydata.dropna(true) to modify dataset inplace
+mydata = mydata.dropna();
+
+std::cout << "\n";
+
+mydata.head();
+```
+Output:
+```
+col1            col2
+----------------------------- 
+                X
+X               X
+
+col1            col2
+-----------------------------
+X               X
+```
+<br/><br/>
+## Replace Null Values
+#### Definitions and Parameters
+```c++
+DataSet<T> replacena(             // NOTE: only works on std::string data
+  const std::string replace_text, // the text you want to replace the null values with
+  bool inplace = false            // whether or not you want to modify the dataset inplace
+)
+```
+#### Examples
+```c++
+DataSet<std::string> mydata(2, 2);
+
+std::vector<std::string> cols = { "col1", "col2" };
+mydata.set_column_names(cols);
+
+mydata.set(0, 1, "X");
+mydata.set(1, 0, "X");
+mydata.set(1, 1, "X");
+
+mydata.head();
+
+mydata.replacena("Y", true);
+
+std::cout << "\n";
+
+mydata.head();
+```
+Output:
+```
+col1            col2
+-----------------------------
+                X
+X               X
+
+col1            col2
+-----------------------------
+Y               X
+X               X
+```
