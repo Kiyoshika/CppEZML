@@ -29,15 +29,12 @@ v0.6.0
 * Added many more code examples for reference
 * Reworked all models to be compatable with DataSet overhaul
 * Fixed memory leak in DecisionTree.hpp (and now using smart pointers)
-* K-Fold Cross Validation
+* Monte Carlo cross validation
 
 # Latest Update (Dev Work)
-## v0.6.1 -- 18 September 2021
-Hotfixes for v0.6.1
-* Bugs when loading 1D vectors into DataSet row-wise; was not using my own API properly due to copy-paste from old API implementation.
-* Linear model run times were long due to being 100,000 iterations each. Reduced iterations and upped learning rate.
-* k_fold_cv renamed to bootstrap_cv since the implementation was not actually the K Fold method.
-* k_fold_cv (now bootstrap_cv) was broken on certain models due to no default constructor. Now passing pointers of objects through function.
+## v0.6.2 -- 19 September 2021
+Fixes for v0.6.2
+* Fixed bug with dropna() not working when entire row was null
 
 ### What's being worked on now?
 * Currently writing documentation following v0.6.0 release.
@@ -45,7 +42,7 @@ Hotfixes for v0.6.1
 
 Upcoming:
 * Sorting and Joining on DataSet.hpp
-* Leave one out cross validation (LOOCV)
+* Leave one out cross validation (LOOCV), K fold cross validation
 * Custom metrics for cross validation
 
 # What's the roadmap?
