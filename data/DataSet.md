@@ -773,6 +773,7 @@ Will drop any rows that contain a null (empty) value. \
 Known Issues:
 * inplace = true currently doesn't function as expected
 * an error is thrown if the entire row is null
+
 ```c++
 DataSet<T> dropna(     // NOTE: only works on std::string data
   bool inplace = false // whether or not to modify the dataset inplace
