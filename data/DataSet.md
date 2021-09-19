@@ -48,6 +48,7 @@ Note: All examples are written in the scope of main() to shorten the code
     2. [count_columns()](#count-columns) - count total columns
 3. Displaying Data
     1. [head()](#printing-first-n-rows) - print first N rows
+    2. [describe()](#describe-data) - print summary statistics for numerical data
 4. Accessing/Modifying Data
     1. [resize()](#resizing-data) - resize rows and columns
     2. [(x, y) operator](#accessing-cell) - access one cell from dataset
@@ -73,6 +74,8 @@ Note: All examples are written in the scope of main() to shorten the code
     2. [countna_vector()](#vector-of-null-counts) - count null columns and return a vector where each index represents a column
     3. [dropna()](#drop-null-values) - drop rows from dataset containing null values
     4. [replacena()](#replace-null-values) - replace null values with another value
+8. Exporting Data
+    1. [to_csv()](#writing-to-csv) - write dataset to csv file
 
 ## Loading From CSV File
 #### Definition and Parameters
@@ -183,6 +186,32 @@ void head(
 ```c++
 DataSet<double> sample_data("example_file.csv");
 sample_data.head();
+```
+<br/><br/>
+## Describe Data
+#### Definition and Parameters
+```c++
+void describe() // NOTE: only works with numerical data
+```
+#### Examples
+```c++
+DataSet<double> mydata("datasets/small_regression_test.csv");
+mydata.describe();
+```
+Output:
+```
+             |  col1            col2            col3            col4            col5            target        
+----------------------------------------------------------------------------------------------------
+Sum:         |  399.500000      376.000000      199.800000      477.650000      315.850000      542.850000    
+Min:         |  1.600000        2.500000        0.010000        0.530000        -1.700000       1.100000      
+Max:         |  6.500000        5.200000        4.200000        9.200000        7.600000        10.400000     
+Mean:        |  3.995000        3.760000        1.998000        4.776500        3.158500        5.428500      
+StDev:       |  1.662563        0.819214        1.365597        2.125624        2.787686        2.276435      
+10th %:      |  1.700000        2.780000        0.371000        2.450000        -0.322000       2.470000      
+25th %:      |  2.500000        3.200000        0.915000        3.250000        0.935000        4.275000      
+Median:      |  3.800000        3.700000        1.750000        4.900000        3.450000        5.635000      
+75th %:      |  5.475000        4.125000        3.050000        6.100000        5.625000        6.725000      
+90th %:      |  5.920000        5.110000        4.100000        6.970000        6.480000        8.400000 
 ```
 <br/><br/>
 ## Resizing Data
@@ -850,3 +879,17 @@ Y               X
 X               X
 ```
 <br/><br/>
+## Writing to CSV
+#### Definition and Parameters
+```c++
+void to_csv(
+  std::string file_name,   // output filename / filepath
+  std::string sep = ",",   //separator to write csv file with
+  bool print_header = true // whether or not to print the column headers to the output file
+)
+```
+#### Examples
+```c++
+DataSet<double> mydata("datasets/small_regression_test.csv");
+mydata.to_csv("output.csv"); // writes to local directory
+```
