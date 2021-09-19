@@ -1,8 +1,12 @@
 # CppEZML Documentation
 ## (NOTICE: THIS DOCUMENTATION IS INCOMPLETE AND UNDER CONSTRUCTION)
-**Documentation Last Updated:** 17 September 2021
+**Documentation Last Updated:** 19 September 2021
 
-**Latest Release:** v0.6.0 -- 16 September 2021
+**Latest Release:** v0.6.1 -- 18 September 2021
+
+[Changelog](Changelog.md) \
+[Releases](https://github.com/Kiyoshika/CppEZML/releases)
+
 
 ## Index
 0. Getting Started
