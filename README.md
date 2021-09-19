@@ -32,8 +32,8 @@ v0.6.0
 * K-Fold Cross Validation
 
 # Latest Update (Dev Work)
-## v0.6.0 -- 18 September 2021
-Hotfixes for v0.6.0
+## v0.6.1 -- 18 September 2021
+Hotfixes for v0.6.1
 * Bugs when loading 1D vectors into DataSet row-wise; was not using my own API properly due to copy-paste from old API implementation.
 * Linear model run times were long due to being 100,000 iterations each. Reduced iterations and upped learning rate.
 * k_fold_cv renamed to bootstrap_cv since the implementation was not actually the K Fold method.
