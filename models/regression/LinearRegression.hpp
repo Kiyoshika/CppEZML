@@ -73,7 +73,7 @@ public:
 	* learning_rate - softening parameter to reduce jumping around the loss function
 	* loss_func - optional loss function that can be passed by reference from user if they want to specify their own loss function
 	*/
-	LinearRegression(size_t max_iter = 100000, double learning_rate = 0.001, double (*loss_func)(double, double) = nullptr)
+	LinearRegression(size_t max_iter = 1000, double learning_rate = 0.01, double (*loss_func)(double, double) = nullptr)
 	: max_iter{max_iter}, learning_rate{learning_rate} 
 	{
 		if (loss_func != NULL) { user_loss_func = loss_func; }
@@ -177,9 +177,9 @@ public:
 		return weights_data;
 	}
 
-	std::vector<double> k_fold_cv(DataSet<double> xdata, DataSet<double> ydata, size_t k = 10, double test_ratio = 0.3)
+	std::vector<double> bootstrap_cv(DataSet<double> xdata, DataSet<double> ydata, size_t k = 30, double test_ratio = 0.3)
 	{
-		return Regressor::k_fold_cv<LinearRegression>(xdata, ydata, k, test_ratio);
+		return Regressor::bootstrap_cv<LinearRegression>(this, xdata, ydata, k, test_ratio);
 	}
 };
 #endif

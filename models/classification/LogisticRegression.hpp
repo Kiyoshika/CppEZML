@@ -80,7 +80,7 @@ public:
 	* learning_rate - softening parameter to reduce jumping around the loss function
 	* loss_func - optional loss function that can be passed by reference from user if they want to specify their own loss function
 	*/
-	LogisticRegression(size_t max_iter = 100000, double learning_rate = 0.001, double (*loss_func)(double, double) = nullptr)
+	LogisticRegression(size_t max_iter = 1000, double learning_rate = 0.01, double (*loss_func)(double, double) = nullptr)
 	: max_iter{max_iter}, learning_rate{learning_rate} 
 	{
 		if (loss_func != NULL) { user_loss_func = loss_func; }
@@ -184,9 +184,9 @@ public:
 		return weights_data;
 	}
 
-	std::vector<double> k_fold_cv(DataSet<double> xdata, DataSet<size_t> ydata, size_t k = 10, double test_ratio = 0.3)
+	std::vector<double> bootstrap_cv(DataSet<double> xdata, DataSet<size_t> ydata, size_t k = 30, double test_ratio = 0.3)
 	{
-		return Classifier::k_fold_cv<LogisticRegression>(xdata, ydata, k, test_ratio);
+		return Classifier::bootstrap_cv<LogisticRegression>(this, xdata, ydata, k, test_ratio);
 	}
 };
 #endif
