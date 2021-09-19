@@ -772,7 +772,6 @@ std::vector<size_t> null_column_counts = mydata.countna_vector(); // { 1, 1 }
 Will drop any rows that contain a null (empty) value. \
 Known Issues:
 * inplace = true currently doesn't function as expected
-* an error is thrown if the entire row is null
 
 ```c++
 DataSet<T> dropna(     // NOTE: only works on std::string data
