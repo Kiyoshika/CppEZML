@@ -52,4 +52,4 @@ Upcoming:
 See "Milestones" under the "Issues" tab for a rough roadmap of the upcoming releases.
 
 # Documentation
-I will be reworking the documentation after the release of v0.6.0. Probably going to use GitHub pages.
+Documentation hosted on github pages: https://kiyoshika.github.io/CppEZML/
