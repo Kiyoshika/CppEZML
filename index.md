@@ -4,9 +4,10 @@
 
 **Latest Release:** v0.6.1 -- 18 September 2021
 
-[Changelog](Changelog.md) \
-[Releases](https://github.com/Kiyoshika/CppEZML/releases)
-
+See the [changelog](Changelog.md)
+<br/>
+See the [releases](https://github.com/Kiyoshika/CppEZML/releases)
+<br/>
 
 ## Index
 0. Getting Started
