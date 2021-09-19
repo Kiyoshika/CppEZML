@@ -29,22 +29,24 @@ v0.6.0
 * Added many more code examples for reference
 * Reworked all models to be compatable with DataSet overhaul
 * Fixed memory leak in DecisionTree.hpp (and now using smart pointers)
-* K-Fold Cross Validation
+* Monte Carlo cross validation
 
 # Latest Update (Dev Work)
-## v0.6.0 -- 16 September 2021
-See dev notes above.
+## v0.6.2 -- 19 September 2021
+Fixes for v0.6.2
+* Fixed bug with dropna() not working when entire row was null
 
-### What's being worked on in v0.6.0?
-Nothing committed since release as of now.
+### What's being worked on now?
+* Currently writing documentation following v0.6.0 release.
+* Performing hotfixes to bugs I missed from v0.6.0 release.
 
 Upcoming:
 * Sorting and Joining on DataSet.hpp
-* Leave one out cross validation (LOOCV)
+* Leave one out cross validation (LOOCV), K fold cross validation
 * Custom metrics for cross validation
 
 # What's the roadmap?
 See "Milestones" under the "Issues" tab for a rough roadmap of the upcoming releases.
 
 # Documentation
-I will be reworking the documentation after the release of v0.6.0. Probably going to use GitHub pages.
+Documentation hosted on github pages: https://kiyoshika.github.io/CppEZML/
