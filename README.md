@@ -39,6 +39,7 @@ v0.6.3 Progress:
 * get_column_indices() is now a public member instead of private
 * Fixed append() when column names were blank
     * also added `inplace = false` parameter to optionally apply append() inplace
+* Added get_rows() to extract multiple row indices at once
 
 ### What's being worked on now?
 * Currently writing documentation following v0.6.0 release.

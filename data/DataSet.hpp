@@ -343,6 +343,26 @@ class DataSet {
             return return_vector;
         }
 
+        // extract specific rows via vector of indices
+        DataSet<T> get_rows(std::vector<size_t> const& row_indices)
+        {
+            DataSet subset;
+            subset.resize(row_indices.size(), this->count_columns());
+            if (this->column_names.size() > 0)
+            {
+                subset.set_column_names(this->column_names);
+            }
+
+            size_t row_iter = 0;
+            for (auto const& row : row_indices)
+            {
+                subset.set_row(row_iter, this->get_row(row));
+                row_iter++;
+            }
+
+            return subset;
+        }
+
         // extract a column as a vector from a vector index
         // data.get_column(column_index)
         std::vector<T> get_column(size_t y)
