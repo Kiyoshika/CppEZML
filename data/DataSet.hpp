@@ -31,22 +31,6 @@ class DataSet {
             return columns_copy;
         }
 
-        std::vector<size_t> get_column_indices(std::vector<std::string> const& passed_columns)
-        {
-            std::vector<size_t> col_idx;
-            for (std::string col_name : passed_columns)
-            {
-                auto it = std::find(column_names.begin(), column_names.end(), col_name);
-                if (it == column_names.end())
-                {
-                    throw std::invalid_argument("Column name '" + col_name + "' was not found.");
-                }
-                col_idx.push_back(it - column_names.begin());
-            }
-
-            return col_idx;
-        }
-
         // takes text parsed by split() and converts it to appropriate data type
         T check_text_type(std::string input_text)
         {
@@ -373,6 +357,23 @@ class DataSet {
             }
 
             return return_vector;
+        }
+
+        // get column indices from a given vector of column names 
+        std::vector<size_t> get_column_indices(std::vector<std::string> const& passed_columns)
+        {
+            std::vector<size_t> col_idx;
+            for (std::string col_name : passed_columns)
+            {
+                auto it = std::find(column_names.begin(), column_names.end(), col_name);
+                if (it == column_names.end())
+                {
+                    throw std::invalid_argument("Column name '" + col_name + "' was not found.");
+                }
+                col_idx.push_back(it - column_names.begin());
+            }
+
+            return col_idx;
         }
 
         // cast data set to specified type
