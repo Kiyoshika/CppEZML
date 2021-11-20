@@ -1454,6 +1454,11 @@ class DataSet {
 
             subset.set_column_names(this->column_names);
 
+            if (inplace)
+            {
+                *this = subset;
+            }
+
             return subset;
         }
 

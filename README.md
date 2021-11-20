@@ -35,6 +35,7 @@ v0.6.0
 ## v0.6.3 -- 20 November 2021
 v0.6.3 Progress:
 * DecisionTree class was using make_unique instead of make_shared for shared pointers
+* dropna() was not working correctly if inplace = true
 
 ### What's being worked on now?
 * Currently writing documentation following v0.6.0 release.
