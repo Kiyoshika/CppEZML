@@ -32,16 +32,17 @@ v0.6.0
 * Monte Carlo cross validation
 
 # Latest Update (Dev Work)
-## v0.6.2 -- 19 September 2021
-Fixes for v0.6.2
-* Fixed bug with dropna() not working when entire row was null
+## v0.6.3 -- 20 November 2021
+v0.6.3 Progress:
+* DecisionTree class was using make_unique instead of make_shared for shared pointers
+* dropna() was not working correctly if inplace = true
 
 ### What's being worked on now?
 * Currently writing documentation following v0.6.0 release.
-* Performing hotfixes to bugs I missed from v0.6.0 release.
+* Performing hotfixes and general bug fixes
 
 Upcoming:
-* Sorting and Joining on DataSet.hpp
+* Allowing local variables in filter()
 * Leave one out cross validation (LOOCV), K fold cross validation
 * Custom metrics for cross validation
 
