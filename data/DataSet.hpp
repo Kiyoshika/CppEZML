@@ -960,12 +960,16 @@ class DataSet {
         }
 
         // append/concat data sets together (if they have the same size)
-        DataSet<T> append(DataSet<T> other_data, char type = 'r')
+        DataSet<T> append(DataSet<T> other_data, char type = 'r', bool inplace = false)
         {
             DataSet<T> appended_data;
 
             // making a copy of current data set in order to not mutate it
-            std::vector<std::string> columns_copy = this->column_names;
+            std::vector<std::string> columns_copy;
+            if (this->column_names.size() > 0)
+            {
+                columns_copy = this->column_names;
+            }
 
             if (type == 'r')
             {
@@ -1001,11 +1005,14 @@ class DataSet {
 
                 // check column collision (all columns need to be uniquely named)
                 std::vector<std::string> col_intersection;
-                std::sort(columns_copy.begin(), columns_copy.end());
-                std::sort(other_data.column_names.begin(), other_data.column_names.end());
-                std::set_intersection(columns_copy.begin(), columns_copy.end(),
-                                    other_data.column_names.begin(), other_data.column_names.end(),
-                                    back_inserter(col_intersection));
+                if (columns_copy.size() > 0)
+                {
+                    std::sort(columns_copy.begin(), columns_copy.end());
+                    std::sort(other_data.column_names.begin(), other_data.column_names.end());
+                    std::set_intersection(columns_copy.begin(), columns_copy.end(),
+                                        other_data.column_names.begin(), other_data.column_names.end(),
+                                        back_inserter(col_intersection));
+                }
 
                 if (col_intersection.size() > 0)
                 {
@@ -1014,9 +1021,12 @@ class DataSet {
 
                 appended_data.resize(this->count_rows(), this->count_columns() + other_data.count_columns());
 
-                for (size_t i = 0; i < other_data.count_columns(); ++i)
+                if (columns_copy.size() > 0)
                 {
-                    columns_copy.push_back(other_data.column_names[i]);
+                    for (size_t i = 0; i < other_data.count_columns(); ++i)
+                    {
+                        columns_copy.push_back(other_data.column_names[i]);
+                    }   
                 }
 
                 // copy first data set
@@ -1036,6 +1046,11 @@ class DataSet {
             else
             {
                 throw std::invalid_argument("Only 'r' (rows) and 'c' (columns) are allowed when appending data.");
+            }
+
+            if (inplace)
+            {
+                *this = appended_data;
             }
 
             return appended_data;

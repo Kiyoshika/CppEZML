@@ -37,6 +37,8 @@ v0.6.3 Progress:
 * DecisionTree class was using make_unique instead of make_shared for shared pointers
 * dropna() was not working correctly if inplace = true
 * get_column_indices() is now a public member instead of private
+* Fixed append() when column names were blank
+    * also added `inplace = false` parameter to optionally apply append() inplace
 
 ### What's being worked on now?
 * Currently writing documentation following v0.6.0 release.
