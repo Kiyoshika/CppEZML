@@ -237,7 +237,7 @@ class DataSet {
             this->rows = row_count;
         }
 
-        bool filter_bool(std::vector<T> const& row_index_values, bool (*filter_conditions)(std::vector<T>))
+        bool filter_bool(std::vector<T> const& row_index_values, std::function<bool(std::vector<T>)> filter_conditions)
         {
             return filter_conditions(row_index_values);
         }
@@ -905,12 +905,10 @@ class DataSet {
             return drop<X>(get_column_indices(indices));
         }
 
-        // return subset of original data filtered by conditions
-        // takes a user-defined filter and passes it as a pointer
-        DataSet<T> filter(bool (*filter_conditions)(std::vector<T>))
+        DataSet<T> filter(std::function<bool(std::vector<T>)> filter_conditions)
         {
             std::vector<size_t> returned_rows;
-            // iterate over data set and evaluate test_function to check whether
+            // iterate over data set and evaluate filter_conditions to check whether
             // or not to return a row
             for (size_t current_row = 0; current_row < this->count_rows(); ++current_row)
             {
