@@ -646,7 +646,7 @@ class DataSet {
 
         // select subset of original data set by index (creates new data set)
         template <typename X>
-        DataSet<X> select(std::vector<size_t> const& indices)
+        DataSet<X> select(std::vector<size_t> const& indices, bool inplace = false)
         {
             size_t new_size = indices.size();
 
@@ -761,19 +761,24 @@ class DataSet {
 
             subset.set_column_names(new_columns);
 
+            if (inplace)
+            {
+                *this = subset;
+            }
+
             return subset;
         }
 
         template <typename X>
-        DataSet<X> select(std::vector<std::string> const& indices)
+        DataSet<X> select(std::vector<std::string> const& indices, bool inplace = false)
         {
             // get column indices from passed vector and call original select() method
-            return select<X>(get_column_indices(indices));
+            return select<X>(get_column_indices(indices), inplace);
         }
 
         // drop certain columns (the inverse of select())
         template <typename X>
-        DataSet<X> drop(std::vector<size_t> const& indices)
+        DataSet<X> drop(std::vector<size_t> const& indices, bool inplace = false)
         {
             size_t new_size = indices.size();
             size_t current_column_index = 0;
@@ -895,17 +900,22 @@ class DataSet {
 
             subset.set_column_names(new_columns);
 
+            if (inplace)
+            {
+                *this = subset;
+            }
+
             return subset;
         }
 
         template <typename X>
-        DataSet<X> drop(std::vector<std::string> const& indices)
+        DataSet<X> drop(std::vector<std::string> const& indices, bool inplace = false)
         {
             // get column indices from passed vector and call original drop() method
-            return drop<X>(get_column_indices(indices));
+            return drop<X>(get_column_indices(indices), inplace);
         }
 
-        DataSet<T> filter(std::function<bool(std::vector<T>)> filter_conditions)
+        DataSet<T> filter(std::function<bool(std::vector<T>)> filter_conditions, bool inplace = false)
         {
             std::vector<size_t> returned_rows;
             // iterate over data set and evaluate filter_conditions to check whether
@@ -925,6 +935,11 @@ class DataSet {
             for (size_t i = 0; i < returned_rows.size(); ++i)
             {
                 filtered_data.set_row(i, this->get_row(returned_rows[i]));
+            }
+
+            if (inplace)
+            {
+                *this = filtered_data;
             }
 
             return filtered_data;
