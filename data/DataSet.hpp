@@ -31,22 +31,6 @@ class DataSet {
             return columns_copy;
         }
 
-        std::vector<size_t> get_column_indices(std::vector<std::string> const& passed_columns)
-        {
-            std::vector<size_t> col_idx;
-            for (std::string col_name : passed_columns)
-            {
-                auto it = std::find(column_names.begin(), column_names.end(), col_name);
-                if (it == column_names.end())
-                {
-                    throw std::invalid_argument("Column name '" + col_name + "' was not found.");
-                }
-                col_idx.push_back(it - column_names.begin());
-            }
-
-            return col_idx;
-        }
-
         // takes text parsed by split() and converts it to appropriate data type
         T check_text_type(std::string input_text)
         {
@@ -253,7 +237,7 @@ class DataSet {
             this->rows = row_count;
         }
 
-        bool filter_bool(std::vector<T> const& row_index_values, bool (*filter_conditions)(std::vector<T>))
+        bool filter_bool(std::vector<T> const& row_index_values, std::function<bool(std::vector<T>)> filter_conditions)
         {
             return filter_conditions(row_index_values);
         }
@@ -359,6 +343,26 @@ class DataSet {
             return return_vector;
         }
 
+        // extract specific rows via vector of indices
+        DataSet<T> get_rows(std::vector<size_t> const& row_indices)
+        {
+            DataSet subset;
+            subset.resize(row_indices.size(), this->count_columns());
+            if (this->column_names.size() > 0)
+            {
+                subset.set_column_names(this->column_names);
+            }
+
+            size_t row_iter = 0;
+            for (auto const& row : row_indices)
+            {
+                subset.set_row(row_iter, this->get_row(row));
+                row_iter++;
+            }
+
+            return subset;
+        }
+
         // extract a column as a vector from a vector index
         // data.get_column(column_index)
         std::vector<T> get_column(size_t y)
@@ -373,6 +377,23 @@ class DataSet {
             }
 
             return return_vector;
+        }
+
+        // get column indices from a given vector of column names 
+        std::vector<size_t> get_column_indices(std::vector<std::string> const& passed_columns)
+        {
+            std::vector<size_t> col_idx;
+            for (std::string col_name : passed_columns)
+            {
+                auto it = std::find(column_names.begin(), column_names.end(), col_name);
+                if (it == column_names.end())
+                {
+                    throw std::invalid_argument("Column name '" + col_name + "' was not found.");
+                }
+                col_idx.push_back(it - column_names.begin());
+            }
+
+            return col_idx;
         }
 
         // cast data set to specified type
@@ -625,7 +646,7 @@ class DataSet {
 
         // select subset of original data set by index (creates new data set)
         template <typename X>
-        DataSet<X> select(std::vector<size_t> const& indices)
+        DataSet<X> select(std::vector<size_t> const& indices, bool inplace = false)
         {
             size_t new_size = indices.size();
 
@@ -740,19 +761,24 @@ class DataSet {
 
             subset.set_column_names(new_columns);
 
+            if (inplace)
+            {
+                *this = subset;
+            }
+
             return subset;
         }
 
         template <typename X>
-        DataSet<X> select(std::vector<std::string> const& indices)
+        DataSet<X> select(std::vector<std::string> const& indices, bool inplace = false)
         {
             // get column indices from passed vector and call original select() method
-            return select<X>(get_column_indices(indices));
+            return select<X>(get_column_indices(indices), inplace);
         }
 
         // drop certain columns (the inverse of select())
         template <typename X>
-        DataSet<X> drop(std::vector<size_t> const& indices)
+        DataSet<X> drop(std::vector<size_t> const& indices, bool inplace = false)
         {
             size_t new_size = indices.size();
             size_t current_column_index = 0;
@@ -874,22 +900,25 @@ class DataSet {
 
             subset.set_column_names(new_columns);
 
+            if (inplace)
+            {
+                *this = subset;
+            }
+
             return subset;
         }
 
         template <typename X>
-        DataSet<X> drop(std::vector<std::string> const& indices)
+        DataSet<X> drop(std::vector<std::string> const& indices, bool inplace = false)
         {
             // get column indices from passed vector and call original drop() method
-            return drop<X>(get_column_indices(indices));
+            return drop<X>(get_column_indices(indices), inplace);
         }
 
-        // return subset of original data filtered by conditions
-        // takes a user-defined filter and passes it as a pointer
-        DataSet<T> filter(bool (*filter_conditions)(std::vector<T>))
+        DataSet<T> filter(std::function<bool(std::vector<T>)> filter_conditions, bool inplace = false)
         {
             std::vector<size_t> returned_rows;
-            // iterate over data set and evaluate test_function to check whether
+            // iterate over data set and evaluate filter_conditions to check whether
             // or not to return a row
             for (size_t current_row = 0; current_row < this->count_rows(); ++current_row)
             {
@@ -906,6 +935,11 @@ class DataSet {
             for (size_t i = 0; i < returned_rows.size(); ++i)
             {
                 filtered_data.set_row(i, this->get_row(returned_rows[i]));
+            }
+
+            if (inplace)
+            {
+                *this = filtered_data;
             }
 
             return filtered_data;
@@ -959,12 +993,16 @@ class DataSet {
         }
 
         // append/concat data sets together (if they have the same size)
-        DataSet<T> append(DataSet<T> other_data, char type = 'r')
+        DataSet<T> append(DataSet<T> other_data, char type = 'r', bool inplace = false)
         {
             DataSet<T> appended_data;
 
             // making a copy of current data set in order to not mutate it
-            std::vector<std::string> columns_copy = this->column_names;
+            std::vector<std::string> columns_copy;
+            if (this->column_names.size() > 0)
+            {
+                columns_copy = this->column_names;
+            }
 
             if (type == 'r')
             {
@@ -1000,11 +1038,14 @@ class DataSet {
 
                 // check column collision (all columns need to be uniquely named)
                 std::vector<std::string> col_intersection;
-                std::sort(columns_copy.begin(), columns_copy.end());
-                std::sort(other_data.column_names.begin(), other_data.column_names.end());
-                std::set_intersection(columns_copy.begin(), columns_copy.end(),
-                                    other_data.column_names.begin(), other_data.column_names.end(),
-                                    back_inserter(col_intersection));
+                if (columns_copy.size() > 0)
+                {
+                    std::sort(columns_copy.begin(), columns_copy.end());
+                    std::sort(other_data.column_names.begin(), other_data.column_names.end());
+                    std::set_intersection(columns_copy.begin(), columns_copy.end(),
+                                        other_data.column_names.begin(), other_data.column_names.end(),
+                                        back_inserter(col_intersection));
+                }
 
                 if (col_intersection.size() > 0)
                 {
@@ -1013,9 +1054,12 @@ class DataSet {
 
                 appended_data.resize(this->count_rows(), this->count_columns() + other_data.count_columns());
 
-                for (size_t i = 0; i < other_data.count_columns(); ++i)
+                if (columns_copy.size() > 0)
                 {
-                    columns_copy.push_back(other_data.column_names[i]);
+                    for (size_t i = 0; i < other_data.count_columns(); ++i)
+                    {
+                        columns_copy.push_back(other_data.column_names[i]);
+                    }   
                 }
 
                 // copy first data set
@@ -1035,6 +1079,11 @@ class DataSet {
             else
             {
                 throw std::invalid_argument("Only 'r' (rows) and 'c' (columns) are allowed when appending data.");
+            }
+
+            if (inplace)
+            {
+                *this = appended_data;
             }
 
             return appended_data;
@@ -1453,6 +1502,11 @@ class DataSet {
             }
 
             subset.set_column_names(this->column_names);
+
+            if (inplace)
+            {
+                *this = subset;
+            }
 
             return subset;
         }
