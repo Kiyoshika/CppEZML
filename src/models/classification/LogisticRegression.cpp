@@ -45,6 +45,6 @@ DataSet<size_t> LogisticRegression::predict(DataSet<double> &input_x)
 
 std::vector<double> LogisticRegression::monte_carlo_cv(DataSet<double> xdata, DataSet<size_t> ydata, size_t k, double test_ratio)
 {
-    Classifier& ref = *this;
+    Classifier &ref = *this;
     return Classifier::monte_carlo_cv(ref, xdata, ydata, k, test_ratio);
 }
