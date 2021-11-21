@@ -41,6 +41,7 @@ v0.6.3 Progress:
     * also added `inplace = false` parameter to optionally apply append() inplace
 * Added get_rows() to extract multiple row indices at once
 * filter() now accepts lamdas that capture local variables
+* select() and filter() can now modify DataSet inplace
 
 ### What's being worked on now?
 * Currently writing documentation following v0.6.0 release.
