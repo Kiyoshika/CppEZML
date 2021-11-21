@@ -763,7 +763,14 @@ class DataSet {
 
             if (inplace)
             {
-                *this = subset;
+                if constexpr(std::is_same_v<T, X>)
+                {
+                    *this = subset;
+                }
+                else
+                {
+                    throw std::runtime_error("Make sure DataSet types are the same if using inplace = true");
+                }
             }
 
             return subset;

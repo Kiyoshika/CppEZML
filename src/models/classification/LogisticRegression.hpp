@@ -58,21 +58,7 @@ private:
 	}
 
 	// local predict, not to be confused with the public predict()
-	double predict(std::vector<double> &weights, std::vector<double> input_x_row)
-	{
-
-		double result = 0;
-
-		for (size_t i = 0; i < weights.size() - 1; ++i)
-		{
-			result += weights[i] * input_x_row[i];
-		}
-
-		// bias term
-		result += weights[weights.size() - 1];
-		// using sigmoid as link function
-		return sigmoid(result);
-	}
+	double m_predict(std::vector<double> &weights, std::vector<double> input_x_row);
 
 public:
 	/*
@@ -118,11 +104,11 @@ public:
 					// bias / intercept
 					if (w == weight_adjustments.size() - 1)
 					{
-						weight_adjustments[w] += (loss_deriv(train_y(r, 0), predict(weights, train_x.get_row(r))) * learning_rate) / train_x.count_rows();
+						weight_adjustments[w] += (loss_deriv(train_y(r, 0), m_predict(weights, train_x.get_row(r))) * learning_rate) / train_x.count_rows();
 					}
 					else
 					{
-						weight_adjustments[w] += (loss_deriv(train_y(r, 0), predict(weights, train_x.get_row(r))) * learning_rate * train_x(r, w)) / train_x.count_rows();
+						weight_adjustments[w] += (loss_deriv(train_y(r, 0), m_predict(weights, train_x.get_row(r))) * learning_rate * train_x(r, w)) / train_x.count_rows();
 					}
 				}
 			}
@@ -139,32 +125,7 @@ public:
 		is_fitted = true;
 	}
 
-	DataSet<size_t> predict(DataSet<double> &input_x) override
-	{
-		DataSet<size_t> prediction_data;
-
-		if (!is_fitted)
-		{
-			throw std::logic_error("Please fit() your model before calling predict()!");
-		}
-
-		std::vector<size_t> predictions;
-		// allocate size
-		predictions.resize(input_x.count_rows());
-
-		for (size_t current_row = 0; current_row < input_x.count_rows(); ++current_row)
-		{
-			// predict() in this case is the private function...no recursion here
-			predictions[current_row] = predict(weights, input_x.get_row(current_row));
-		}
-
-		prediction_data.resize(predictions.size(), 1);
-		prediction_data.set_column(0, predictions);
-		std::vector<std::string> col_name = {"predicted_y"};
-		prediction_data.set_column_names(col_name);
-
-		return prediction_data;
-	}
+	DataSet<size_t> predict(DataSet<double> &input_x);
 
 	DataSet<double> get_weights()
 	{
@@ -184,9 +145,6 @@ public:
 		return weights_data;
 	}
 
-	std::vector<double> monte_carlo_cv(DataSet<double> xdata, DataSet<size_t> ydata, size_t k = 30, double test_ratio = 0.3)
-	{
-		return Classifier::monte_carlo_cv<LogisticRegression>(this, xdata, ydata, k, test_ratio);
-	}
+	std::vector<double> monte_carlo_cv(DataSet<double> xdata, DataSet<size_t> ydata, size_t k = 3, double test_ratio = 0.3);
 };
 #endif
