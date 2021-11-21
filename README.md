@@ -3,7 +3,6 @@ A work in progress C++ machine learning library designed to be very easy to use.
 
 NOTICE: This library is still heavily in development and NOT recommended for production use (or even recreational use at this point).
 
-This library may become more stable around v0.8.0 or afterwards...
 
 # Latest Release
 ## v0.6.3 -- 20 November 2021
@@ -17,12 +16,14 @@ This library may become more stable around v0.8.0 or afterwards...
 * filter() and select() can now modify DataSet inplace instead of returning only copies
 
 # Latest Update (Dev Work)
-## v0.6.3 -- 20 November 2021
-No updates since release (above)
+## v0.6.4 -- 21 November 2021
+* Converting entire project to CMake and changing structure (separating declaration from implementation)
+* Going to start using Doxygen for documentation instead of writing it by hand
 
 ### What's being worked on now?
-* Finishing documentation
-* Planning features for v0.6.4
+* Changing structure of project to separate declaration from implementation
+* Converting project to CMake to create static libraries
+* Writing Doxygen comments for the better method of documentation
 
 Upcoming:
 * Leave one out cross validation (LOOCV), K fold cross validation
