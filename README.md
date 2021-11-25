@@ -1,7 +1,8 @@
 # CppEZML
-A work in progress C++ machine learning library designed to be very easy to use. Everything pretty much written from scratch.
+## NOTICE 2021/25/11: CppEZML Being Rebuilt (and Renamed to zslib)
+I am completely rebuilding this library from the ground up. The codebase for this project is just a little messier than I'd like, so I'm starting the project again this time using CMake and Doxygen + organizing my code better. I am also writing it in such a way to support older standards (right now CppEZML depends on C++17 or higher. zslib current state supports C++11 and I plan to (try and) keep it that way.
 
-NOTICE: This library is still heavily in development and NOT recommended for production use (or even recreational use at this point).
+Follow the progress at my new repo: https://github.com/Kiyoshika/zslib
 
 
 # Latest Release
