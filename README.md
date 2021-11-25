@@ -1,5 +1,5 @@
 # CppEZML
-## NOTICE 2021/25/11: CppEZML Being Rebuilt (and Renamed to zslib)
+## NOTICE 25 November 2021: CppEZML Being Rebuilt (and Renamed to zslib)
 I am completely rebuilding this library from the ground up. The codebase for this project is just a little messier than I'd like, so I'm starting the project again this time using CMake and Doxygen + organizing my code better. I am also writing it in such a way to support older standards (right now CppEZML depends on C++17 or higher. zslib current state supports C++11 and I plan to (try and) keep it that way.
 
 Follow the progress at my new repo: https://github.com/Kiyoshika/zslib
